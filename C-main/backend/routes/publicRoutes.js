@@ -95,19 +95,12 @@ function obfuscateText(text) {
     }
 }
 
-// 🔥 Helper for URL Obfuscation (Strong Protection)
+// 🔥 Helper for URL Obfuscation (Simplified to Base64 for images as requested)
 function obfuscateUrl(url) {
     if (!url) return "";
     try {
-        let result = "";
-        for (let i = 0; i < url.length; i++) {
-            let charCode = url.charCodeAt(i);
-            charCode = charCode ^ ZEUS_SECRET.charCodeAt(i % ZEUS_SECRET.length);
-            const offset = (i * 3) % 7;
-            charCode = (charCode + offset) % 256;
-            result += String.fromCharCode(charCode);
-        }
-        return Buffer.from(result).toString('base64');
+        // Just return Base64 to "hide" the URL from casual view without complex encryption
+        return Buffer.from(url).toString('base64');
     } catch (e) {
         return url;
     }
@@ -1284,16 +1277,26 @@ module.exports = function(app, verifyToken, upload) {
             const { url } = req.query;
             if (!url) return res.status(400).send("URL required");
 
-            // 1. 🔥 DEOBFUSCATE URL (Reverse the strong protection)
+            // 1. 🔥 DEOBFUSCATE URL (Now just Base64 decode for images as requested)
             let originalUrl = "";
             try {
-                const buffer = Buffer.from(url, 'base64').toString('binary');
-                for (let i = 0; i < buffer.length; i++) {
-                    let charCode = buffer.charCodeAt(i);
-                    const offset = (i * 3) % 7;
-                    charCode = (charCode - offset + 256) % 256;
-                    charCode = charCode ^ ZEUS_SECRET.charCodeAt(i % ZEUS_SECRET.length);
-                    originalUrl += String.fromCharCode(charCode);
+                // Try to decode as plain Base64 first
+                originalUrl = Buffer.from(url, 'base64').toString('utf8');
+                
+                // If it doesn't look like a URL after decoding, it might be the old encrypted format
+                if (!originalUrl.startsWith('http')) {
+                    let decrypted = "";
+                    const buffer = Buffer.from(url, 'base64').toString('binary');
+                    for (let i = 0; i < buffer.length; i++) {
+                        let charCode = buffer.charCodeAt(i);
+                        const offset = (i * 3) % 7;
+                        charCode = (charCode - offset + 256) % 256;
+                        charCode = charCode ^ ZEUS_SECRET.charCodeAt(i % ZEUS_SECRET.length);
+                        decrypted += String.fromCharCode(charCode);
+                    }
+                    if (decrypted.startsWith('http')) {
+                        originalUrl = decrypted;
+                    }
                 }
             } catch (e) {
                 originalUrl = url; // Fallback if not obfuscated
