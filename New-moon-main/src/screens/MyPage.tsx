@@ -60,7 +60,7 @@ const GridSkeleton = () => (
 );
 
 // مكون بطاقة العمل (Grid)
-const WorkCard = ({ work, onClick }: { work: any; onClick: () => void }) => (
+const WorkCard: React.FC<{ work: any; onClick: () => void }> = ({ work, onClick }) => (
   <motion.div
     whileHover={{ scale: 1.03, y: -4 }}
     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -72,7 +72,9 @@ const WorkCard = ({ work, onClick }: { work: any; onClick: () => void }) => (
         <img
           src={work.cover}
           alt={work.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onContextMenu={(e) => e.preventDefault()}
+          draggable={false}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none"
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -90,7 +92,7 @@ const WorkCard = ({ work, onClick }: { work: any; onClick: () => void }) => (
 );
 
 // مكون بطاقة المفضلة (Grid)
-const FavoriteCard = ({ item, onClick }: { item: any; onClick: () => void }) => (
+const FavoriteCard: React.FC<{ item: any; onClick: () => void }> = ({ item, onClick }) => (
   <motion.div
     whileHover={{ scale: 1.03, y: -4 }}
     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -102,7 +104,9 @@ const FavoriteCard = ({ item, onClick }: { item: any; onClick: () => void }) => 
         <img
           src={item.cover}
           alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onContextMenu={(e) => e.preventDefault()}
+          draggable={false}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none"
         />
       </div>
       <div className="absolute top-2 left-2">
@@ -118,7 +122,7 @@ const FavoriteCard = ({ item, onClick }: { item: any; onClick: () => void }) => 
 );
 
 // مكون بطاقة التاريخ (List)
-const HistoryCard = ({ item, onClick }: { item: any; onClick: () => void }) => (
+const HistoryCard: React.FC<{ item: any; onClick: () => void }> = ({ item, onClick }) => (
   <motion.div
     whileHover={{ scale: 1.01, x: -4 }}
     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -126,7 +130,13 @@ const HistoryCard = ({ item, onClick }: { item: any; onClick: () => void }) => (
     className="flex flex-row-reverse gap-4 bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
   >
     <div className="w-20 h-24 rounded-lg overflow-hidden shrink-0">
-      <img src={item.cover} alt={item.title} className="w-full h-full object-cover" />
+      <img 
+        src={item.cover} 
+        alt={item.title} 
+        onContextMenu={(e) => e.preventDefault()}
+        draggable={false}
+        className="w-full h-full object-cover select-none" 
+      />
     </div>
     <div className="flex-1 text-right">
       <h3 className="text-white font-bold text-base line-clamp-1">{item.title}</h3>
@@ -532,7 +542,9 @@ export default function MyPage() {
             <img
               src={backgroundImage}
               alt=""
-              className="w-full h-full object-cover opacity-40 blur-sm"
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
+              className="w-full h-full object-cover opacity-40 blur-sm select-none"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
           </div>
@@ -622,7 +634,9 @@ export default function MyPage() {
           <img
             src={backgroundImage}
             alt=""
-            className="w-full h-full object-cover opacity-40 blur-sm"
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
+            className="w-full h-full object-cover opacity-40 blur-sm select-none"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
         </div>
@@ -668,7 +682,9 @@ export default function MyPage() {
                 <img
                   src={profileUser?.banner || backgroundImage}
                   alt="Banner"
-                  className="w-full h-full object-cover"
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable={false}
+                  className="w-full h-full object-cover select-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
               </div>
@@ -684,7 +700,9 @@ export default function MyPage() {
                   <img
                     src={profileUser?.picture || backgroundImage}
                     alt={profileUser?.name}
-                    className="w-full h-full object-cover"
+                    onContextMenu={(e) => e.preventDefault()}
+                    draggable={false}
+                    className="w-full h-full object-cover select-none"
                   />
                 </motion.div>
                 <motion.h2
