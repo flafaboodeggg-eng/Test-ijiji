@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { useParams, useRouter } from 'next/navigation';
+import Head from 'next/head';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, Settings, List, MessageCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +23,7 @@ import toast from 'react-hot-toast';
 
 export default function Reader() {
   const { novelId, chapterId } = useParams<{ novelId: string; chapterId: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { userInfo } = useAuth();
   const isAdmin = userInfo?.role === 'admin';
 
@@ -83,13 +83,13 @@ export default function Reader() {
     if (msg === 'toggleMenu') setShowMenu(prev => !prev);
     else if (msg === 'openComments') setShowComments(true);
     else if (msg === 'openProfile') {
-      if (authorProfile) navigate(`/user/${authorProfile._id}`);
+      if (authorProfile) router.push(`/user/${authorProfile._id}`);
     }
-  }, [authorProfile, navigate]);
+  }, [authorProfile, router]);
 
   const navigateChapter = (number: number) => {
     if (number === parseInt(chapterId!)) return;
-    navigate(`/novel/${novelId}/reader/${number}`);
+    router.push(`/novel/${novelId}/reader/${number}`);
     setDrawerMode('none');
   };
 
@@ -101,7 +101,7 @@ export default function Reader() {
       toast.error('أنت في آخر فصل متاح.');
       return;
     }
-    navigate(`/novel/${novelId}/reader/${next}`);
+    router.push(`/novel/${novelId}/reader/${next}`);
   };
 
   const handleAddComment = useCallback(async (content: string) => {
@@ -135,7 +135,7 @@ export default function Reader() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>قمر الروايات - {chapter?.title || `فصل ${chapterId}`} | {novel?.title}</title>
         <meta name="description" content={`اقرأ ${chapter?.title || `الفصل ${chapterId}`} من رواية ${novel?.title} على قمر الروايات. استمتع بأحدث الفصول المترجمة والحصرية.`} />
         <meta name="keywords" content={`${novel?.title}, ${chapter?.title}, الفصل ${chapterId}, روايات عربية, روايات مترجمة, قمر الروايات`} />
@@ -159,7 +159,7 @@ export default function Reader() {
         {/* AI Crawlers & SEO */}
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`https://moonnovel.vercel.app/novel/${novelId}/reader/${chapterId}`} />
-      </Helmet>
+      </Head>
       <div className="relative h-screen w-full overflow-hidden bg-gray-900">
         {/* Top Bar */}
         <motion.div
@@ -171,7 +171,7 @@ export default function Reader() {
         >
           <div className="flex items-center justify-between px-4 py-3">
             <button
-              onClick={() => navigate(`/novel/${novelId}`)}
+              onClick={() => router.push(`/novel/${novelId}`)}
               className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
             >
               <ChevronLeft size={24} className="text-white" />
