@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { 
   Search, 
   ChevronDown, 
@@ -170,7 +170,7 @@ const FilterModal = ({
 };
 
 export default function Library() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
@@ -397,7 +397,7 @@ export default function Library() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.03 }}
                   >
-                    <NovelCard novel={novel} onClick={() => navigate(`/novel/${novel._id}`)} />
+                    <NovelCard novel={novel} onClick={() => router.push(`/novel/${novel._id}`)} />
                   </motion.div>
                 ))}
               </div>
