@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { useAuth } from '../context/AuthContext';
 import {
   Star,
@@ -154,7 +154,7 @@ const EnhancedPageSelectorModal = ({
 
 export default function NovelPage() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isAuthenticated, openAuthModal } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [novel, setNovel] = useState<Novel | null>(null);
@@ -322,7 +322,7 @@ export default function NovelPage() {
   const handleChapterClick = (chapter: ChapterMeta) => {
     if (!slug) return;
     // Navigate to reader
-    navigate(`/novel/${slug}/reader/${chapter.number}`);
+    router.push(`/novel/${slug}/reader/${chapter.number}`);
     // Mark as read locally (optimistic)
     if (!readChapters.includes(chapter.number)) {
       const newRead = [...readChapters, chapter.number];
@@ -398,7 +398,7 @@ export default function NovelPage() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>قمر الروايات - {novel.title}</title>
         <meta name="description" content={`اقرأ رواية ${novel.title} على قمر الروايات. ${novel.description?.slice(0, 150)}...`} />
         <meta name="keywords" content={`${novel.title}, رواية ${novel.title}, ${novel.author}, ${novel.tags?.join(', ')}, روايات عربية, روايات مترجمة`} />
@@ -443,7 +443,7 @@ export default function NovelPage() {
             }
           })}
         </script>
-      </Helmet>
+      </Head>
       <div className="relative min-h-screen bg-background text-foreground" style={{ fontFamily: "'Cairo', sans-serif" }}>
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
