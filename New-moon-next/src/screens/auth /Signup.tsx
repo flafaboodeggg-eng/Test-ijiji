@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { Mail, Lock, User, UserPlus, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/auth';
@@ -12,7 +13,7 @@ import toast from 'react-hot-toast';
 import backgroundImage from '../../assets/adaptive-icon.png';
 
 export default function Signup() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login: authLogin } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -60,7 +61,7 @@ export default function Signup() {
       const { token, user } = await authService.signup(name, email, password);
       authLogin(token, user);
       toast.success('تم إنشاء الحساب بنجاح');
-      navigate('/');
+      router.push('/');
     } catch (error: any) {
       const message = error.response?.data?.message || 'فشل إنشاء الحساب';
       toast.error(message);
@@ -71,9 +72,9 @@ export default function Signup() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>قمر الروايات - إنشاء حساب</title>
-      </Helmet>
+      </Head>
       <div className="min-h-screen relative overflow-hidden bg-black">
         <div className="absolute inset-0 z-0">
           <img
@@ -232,7 +233,7 @@ export default function Signup() {
 
               {/* رابط تسجيل الدخول */}
               <div className="p-6 pt-0 text-center">
-                <Link to="/login">
+                <Link href="/login">
                   <motion.span
                     whileHover={{ scale: 1.02 }}
                     className="text-white/60 hover:text-white transition-colors text-sm flex items-center justify-center gap-1"
