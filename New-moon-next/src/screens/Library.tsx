@@ -171,6 +171,10 @@ const FilterModal = ({
 
 export default function Library() {
   const router = useRouter();
+  
+  // الاحترافية تبدأ من هنا: منع رندر المكونات التي تطلب DOM حتى تركيب المكون
+  const [mounted, setMounted] = useState(false);
+  
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
@@ -183,14 +187,13 @@ export default function Library() {
   // Modal states
   const [modalType, setModalType] = useState<'sort' | 'category' | 'status' | null>(null);
 
-  // جلب التصنيفات وتصفيتها (إزالة التي تحتوي على إنجليزية)
+  // جلب التصنيفات وتصفيتها
   const { data: rawCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoryService.getCategories(),
     staleTime: 30 * 60 * 1000,
   });
 
-  // تصفية التصنيفات: استبعاد أي تصنيف يحتوي على أحرف إنجليزية
   const categories = rawCategories.filter((cat: any) => !containsEnglish(cat.name));
 
   // جلب الروايات
@@ -212,12 +215,14 @@ export default function Library() {
   const novels = data?.novels || [];
   const totalPages = data?.totalPages || 1;
 
-  // إعادة تعيين الصفحة عند تغيير الفلاتر أو البحث
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     setPage(1);
   }, [selectedCategory, selectedStatus, selectedSort, debouncedSearch]);
 
-  // الحصول على اسم التصنيف المحدد للعرض
   const getSelectedCategoryName = () => {
     if (selectedCategory === 'all') return 'التصنيف';
     const cat = categories.find((c: any) => c.id === selectedCategory);
@@ -234,9 +239,9 @@ export default function Library() {
     return sort?.name || 'الترتيب';
   };
 
-  // عدد الأعمدة responsive
   const [columns, setColumns] = useState(4);
   useEffect(() => {
+    if (!mounted) return;
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) setColumns(2);
@@ -246,14 +251,15 @@ export default function Library() {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [mounted]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  // توليد أزرار الصفحات
   const renderPageButtons = () => {
     const maxButtons = 5;
     let start = Math.max(1, page - 2);
@@ -299,7 +305,6 @@ export default function Library() {
     );
   };
 
-  // تأثير الوضع المظلم
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -307,6 +312,17 @@ export default function Library() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // إذا لم يتم تحميل المكون بعد، نعرض واجهة بسيطة أو هيكل فارغ لمنع خطأ الـ Build والـ Hydration
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black" dir="rtl">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mt-20" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -316,7 +332,6 @@ export default function Library() {
       <div className="min-h-screen bg-background text-foreground transition-colors duration-500" dir="rtl">
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
         <div className="relative overflow-hidden bg-black">
-          {/* خلفية زجاجية */}
           <div className="absolute inset-0 z-0">
             <img
               src={backgroundImage}
@@ -327,13 +342,11 @@ export default function Library() {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
-            {/* العنوان مع شعار */}
             <div className="flex items-center gap-3 mb-6">
               <Sparkles size={28} className="text-white" />
               <h1 className="text-3xl font-bold text-white">المكتبة</h1>
             </div>
 
-            {/* شريط البحث */}
             <div className="relative mb-5">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 w-5 h-5" />
               <input
@@ -353,7 +366,6 @@ export default function Library() {
               )}
             </div>
 
-            {/* أزرار الفلاتر */}
             <div className="flex flex-wrap gap-3 mb-6">
               <button
                 onClick={() => setModalType('sort')}
@@ -378,7 +390,6 @@ export default function Library() {
               </button>
             </div>
 
-            {/* قائمة الروايات */}
             {isLoading ? (
               <div className="flex justify-center items-center py-20">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -403,10 +414,8 @@ export default function Library() {
               </div>
             )}
 
-            {/* أزرار الصفحات */}
             {totalPages > 1 && !isLoading && renderPageButtons()}
 
-            {/* مؤشر تحميل عند تحديث البيانات */}
             {isFetching && !isLoading && (
               <div className="flex justify-center py-4">
                 <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -415,7 +424,6 @@ export default function Library() {
           </div>
         </div>
 
-        {/* النوافذ المنبثقة للفلترة */}
         <FilterModal
           isOpen={modalType === 'sort'}
           onClose={() => setModalType(null)}
