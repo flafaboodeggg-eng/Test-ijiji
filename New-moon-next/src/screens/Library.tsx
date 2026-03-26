@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { 
@@ -326,9 +326,9 @@ export default function Library() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>قمر الروايات - المكتبة</title>
-      </Helmet>
+      </Head>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-500" dir="rtl">
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
         <div className="relative overflow-hidden bg-black">
