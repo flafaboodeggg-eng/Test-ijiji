@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { Mail, Lock, LogIn, UserPlus, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/auth';
@@ -13,7 +14,7 @@ import toast from 'react-hot-toast';
 import backgroundImage from '../../assets/adaptive-icon.png';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login: authLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +32,7 @@ export default function Login() {
       const { token, user } = await authService.login(email, password);
       authLogin(token, user);
       toast.success('تم تسجيل الدخول بنجاح');
-      navigate('/');
+      router.push('/');
     } catch (error: any) {
       const status = error.response?.status;
       const message = error.response?.data?.message;
@@ -55,9 +56,9 @@ export default function Login() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>قمر الروايات - تسجيل الدخول</title>
-      </Helmet>
+      </Head>
       <div className="min-h-screen relative overflow-hidden bg-black">
         {/* خلفية زجاجية مع الصورة */}
         <div className="absolute inset-0 z-0">
@@ -206,7 +207,7 @@ export default function Login() {
 
               {/* رابط إنشاء حساب */}
               <div className="p-6 pt-0 text-center">
-                <Link to="/signup">
+                <Link href="/signup">
                   <motion.span
                     whileHover={{ scale: 1.02 }}
                     className="text-white/60 hover:text-white transition-colors text-sm flex items-center justify-center gap-1"
