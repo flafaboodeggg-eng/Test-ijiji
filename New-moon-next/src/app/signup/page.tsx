@@ -1,3 +1,5 @@
+import SignupScreen from '@/screens/auth /Signup';
+
 export default function SignupPage() {
-  return <div style={{minHeight:'100vh',background:'#0a0a0a'}} />;
+  return <SignupScreen />;
 }
