@@ -204,14 +204,14 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with smooth animation */}
+          {/* Hero Slider with simple animation */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
               autoplay={{ delay: 5000 }}
               pagination={{ clickable: true }}
               loop
-              speed={800} // Slow transition between slides
+              speed={800}
               className="h-full w-full"
               onSlideChange={(swiper) => setActiveSlideIndex(swiper.realIndex)}
               onInit={(swiper) => setActiveSlideIndex(swiper.realIndex)}
@@ -248,11 +248,11 @@ export default function Home() {
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
                               <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
                                 
-                                {/* Poster Image - animated from bottom with spring */}
+                                {/* Poster Image - simple fade + translateY */}
                                 <motion.div
-                                  initial={{ opacity: 0, y: 40 }}
-                                  animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-                                  transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                  transition={{ duration: 0.3, ease: 'easeOut' }}
                                   className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2"
                                 >
                                   <img
@@ -264,25 +264,20 @@ export default function Home() {
                                   />
                                 </motion.div>
 
-                                {/* Info Container - now on the left */}
+                                {/* Info Container - simple fade + translateY */}
                                 <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
                                   <motion.div
-                                    initial={{ opacity: 0, y: 40 }}
-                                    animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-                                    transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15, delay: 0.05 }}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                    transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
                                     className="flex flex-col items-start w-full"
                                   >
                                     {/* Status Badge */}
-                                    <motion.div
-                                      initial={{ opacity: 0, y: 20 }}
-                                      animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                      transition={{ duration: 0.5, delay: 0.2 }}
-                                      className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2"
-                                    >
+                                    <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
                                       <span className="text-[10px] font-bold" style={{ color: textColor }}>
                                         {statusText}
                                       </span>
-                                    </motion.div>
+                                    </div>
                                     
                                     {/* Title */}
                                     <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full">
