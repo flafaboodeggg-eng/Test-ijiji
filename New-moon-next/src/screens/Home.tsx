@@ -247,11 +247,11 @@ export default function Home() {
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
                               <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
                                 
-                                {/* Poster Image - with animation */}
+                                {/* Poster Image - animated from bottom with spring */}
                                 <motion.div
-                                  initial={{ opacity: 0, x: 40 }}
-                                  animate={activeSlideIndex === idx ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
-                                  transition={{ duration: 0.5, ease: "easeOut" }}
+                                  initial={{ opacity: 0, y: 40 }}
+                                  animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+                                  transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
                                   className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2"
                                 >
                                   <img
@@ -263,12 +263,12 @@ export default function Home() {
                                   />
                                 </motion.div>
 
-                                {/* Info Container - now on the left with animation */}
+                                {/* Info Container - now on the left */}
                                 <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
                                   <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={activeSlideIndex === idx ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.5, ease: "easeOut" }}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+                                    transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15, delay: 0.05 }}
                                     className="flex flex-col items-start w-full"
                                   >
                                     {/* Status Badge */}
