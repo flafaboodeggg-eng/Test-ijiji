@@ -125,31 +125,55 @@ export default function Home() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [visibleSlides, setVisibleSlides] = useState<number[]>([]);
   const swiperRef = useRef<any>(null);
-  const { user } = useAuth(); // الحصول على المستخدم من السياق
+  
+  // 🔥 استخدم useAuth بالطريقة نفسها المستخدمة في القارئ
+  const { userInfo } = useAuth();
+  
+  // 🔥 حالة محلية لآخر قراءة
+  const [lastRead, setLastRead] = useState<LastRead | null>(null);
+  const [loadingLastRead, setLoadingLastRead] = useState<boolean>(true);
 
-  // --- جلب آخر قراءة باستخدام خدمة novelService ---
-  const {
-    data: lastReadData,
-    isLoading: lastReadLoading,
-    refetch: refetchLastRead,
-  } = useQuery({
-    queryKey: ['lastRead', user?._id],
-    queryFn: async () => {
-      if (!user) return null;
+  // 🔥 جلب آخر قراءة عند تحميل الصفحة وعند تغيير المستخدم
+  useEffect(() => {
+    const fetchLastRead = async () => {
+      if (!userInfo) {
+        console.log('❌ لا يوجد مستخدم مسجل دخول');
+        setLoadingLastRead(false);
+        setLastRead(null);
+        return;
+      }
+      
+      console.log('✅ المستخدم مسجل:', userInfo.name, userInfo.email);
+      setLoadingLastRead(true);
+      
       try {
         const history = await novelService.getUserLibrary(undefined, 'history', 1, 1);
-        return history && history.length > 0 ? (history[0] as LastRead) : null;
+        console.log('📚 نتيجة جلب آخر قراءة:', history);
+        
+        if (history && history.length > 0) {
+          const item = history[0];
+          // تحقق من وجود الحقول الأساسية
+          if (item.novelId && item.lastChapterId) {
+            setLastRead(item as LastRead);
+            console.log('✅ تم تعيين آخر قراءة:', item.title, 'الفصل', item.lastChapterId);
+          } else {
+            console.warn('⚠️ البيانات غير مكتملة:', item);
+            setLastRead(null);
+          }
+        } else {
+          console.log('ℹ️ لا يوجد تاريخ قراءة لهذا المستخدم');
+          setLastRead(null);
+        }
       } catch (err) {
-        console.error('Failed to fetch last read:', err);
-        return null;
+        console.error('❌ فشل جلب آخر قراءة:', err);
+        setLastRead(null);
+      } finally {
+        setLoadingLastRead(false);
       }
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true, // تحديث عند العودة للصفحة
-  });
-
-  const lastRead = lastReadData;
+    };
+    
+    fetchLastRead();
+  }, [userInfo]);
 
   // استخدام React Query مع staleTime طويل للتخزين المؤقت
   const { data: heroData, isLoading: heroLoading } = useQuery({
@@ -338,8 +362,18 @@ export default function Home() {
             </Swiper>
           </section>
 
-          {/* Continue Reading Section - فقط إذا كان المستخدم مسجلاً ولديه آخر قراءة */}
-          {user && lastRead && !lastReadLoading && (
+          {/* 🔥🔥🔥 قسم استئناف القراءة – مع تتبع كامل 🔥🔥🔥 */}
+          {(() => {
+            console.log('🔍 حالة عرض القسم:', {
+              userInfo: !!userInfo,
+              lastRead: !!lastRead,
+              loadingLastRead,
+              lastReadData: lastRead
+            });
+            return null;
+          })()}
+          
+          {userInfo && lastRead && !loadingLastRead && (
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -352,7 +386,7 @@ export default function Home() {
                   <h2 className="text-xl font-bold">استئناف القراءة</h2>
                 </div>
                 <Link
-                  href={`/reader?novelId=${lastRead.novelId}&chapterId=${lastRead.lastChapterId}`}
+                  href={`/novel/${lastRead.novelId}/reader/${lastRead.lastChapterId}`}
                   className="block"
                 >
                   <div className="bg-gradient-to-r from-[#0f0f0f] to-[#0a0a0a] rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 group">
@@ -374,7 +408,7 @@ export default function Home() {
                         <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
                           <div
                             className="bg-primary h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${lastRead.progress || 0}%` }}
+                            style={{ width: `${Math.min(100, lastRead.progress || 0)}%` }}
                           />
                         </div>
                         <div className="flex justify-between text-xs text-gray-500">
@@ -561,12 +595,12 @@ export default function Home() {
       {/* إضافة CSS لتخصيص ألوان نقاط الترقيم */}
       <style jsx global>{`
         .swiper-pagination-bullet {
-          background-color: #6b7280 !important; /* رمادي */
+          background-color: #6b7280 !important;
           opacity: 0.7;
           transition: all 0.2s;
         }
         .swiper-pagination-bullet-active {
-          background-color: #3b82f6 !important; /* أزرق */
+          background-color: #3b82f6 !important;
           opacity: 1;
         }
       `}</style>
