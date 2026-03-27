@@ -204,13 +204,14 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with fixed animation */}
+          {/* Hero Slider with smooth animation */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
               autoplay={{ delay: 5000 }}
               pagination={{ clickable: true }}
               loop
+              speed={800} // Slow transition between slides
               className="h-full w-full"
               onSlideChange={(swiper) => setActiveSlideIndex(swiper.realIndex)}
               onInit={(swiper) => setActiveSlideIndex(swiper.realIndex)}
@@ -272,11 +273,16 @@ export default function Home() {
                                     className="flex flex-col items-start w-full"
                                   >
                                     {/* Status Badge */}
-                                    <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                      transition={{ duration: 0.5, delay: 0.2 }}
+                                      className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2"
+                                    >
                                       <span className="text-[10px] font-bold" style={{ color: textColor }}>
                                         {statusText}
                                       </span>
-                                    </div>
+                                    </motion.div>
                                     
                                     {/* Title */}
                                     <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full">
