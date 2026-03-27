@@ -194,6 +194,52 @@ export default function Home() {
   const recentNovels = recentData?.novels || [];
   const isLoading = heroLoading || trendingLoading || recentLoading;
 
+  // تعريف متغيرات الأنيميشن للمعلومات (stagger children)
+  const infoVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const childVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 25,
+        mass: 0.8,
+      },
+    },
+  };
+
+  const buttonVariants = {
+    hidden: { opacity: 0, scale: 0.8, rotateX: -15 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 20,
+        delay: 0.3,
+      },
+    },
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.2, yoyo: Infinity },
+    },
+  };
+
   return (
     <>
       <div
@@ -204,7 +250,7 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with simple animation */}
+          {/* Hero Slider with spectacular animations */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
@@ -248,13 +294,8 @@ export default function Home() {
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
                               <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
                                 
-                                {/* Poster Image - simple fade + translateY */}
-                                <motion.div
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                                  className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2"
-                                >
+                                {/* Poster Image - no animation, static */}
+                                <div className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2">
                                   <img
                                     src={novel.cover}
                                     alt={novel.title}
@@ -262,35 +303,45 @@ export default function Home() {
                                     draggable={false}
                                     className="w-[120px] h-[180px] md:w-[140px] md:h-[210px] object-cover rounded-xl select-none"
                                   />
-                                </motion.div>
+                                </div>
 
-                                {/* Info Container - simple fade + translateY */}
+                                {/* Info Container - spectacular staggered animations */}
                                 <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
                                   <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={activeSlideIndex === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
+                                    key={activeSlideIndex} // إعادة تشغيل الأنيميشن عند تغيير السلايد
+                                    variants={infoVariants}
+                                    initial="hidden"
+                                    animate="visible"
                                     className="flex flex-col items-start w-full"
                                   >
                                     {/* Status Badge */}
-                                    <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
+                                    <motion.div variants={childVariants} className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
                                       <span className="text-[10px] font-bold" style={{ color: textColor }}>
                                         {statusText}
                                       </span>
-                                    </div>
+                                    </motion.div>
                                     
                                     {/* Title */}
-                                    <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full">
+                                    <motion.h2 
+                                      variants={childVariants}
+                                      className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full"
+                                    >
                                       {novel.title}
-                                    </h2>
+                                    </motion.h2>
                                     
                                     {/* Author */}
-                                    <p className="text-gray-300 text-sm md:text-base mb-4 text-right w-full">
+                                    <motion.p 
+                                      variants={childVariants}
+                                      className="text-gray-300 text-sm md:text-base mb-4 text-right w-full"
+                                    >
                                       {novel.author}
-                                    </p>
+                                    </motion.p>
 
                                     {/* Stats */}
-                                    <div className="flex flex-row items-center gap-3 mb-5">
+                                    <motion.div 
+                                      variants={childVariants}
+                                      className="flex flex-row items-center gap-3 mb-5"
+                                    >
                                       <div className="flex items-center gap-1.5">
                                         <span className="text-white text-sm font-semibold">{novel.chaptersCount || 0} فصل</span>
                                         <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-[#4a7cc7]"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
@@ -300,13 +351,17 @@ export default function Home() {
                                         <span className="text-gray-300 text-sm">{novel.views || 0}</span>
                                         <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-gray-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                       </div>
-                                    </div>
+                                    </motion.div>
 
-                                    {/* Read Button */}
-                                    <button className="flex flex-row items-center gap-2 bg-[#4a7cc7] px-6 py-2.5 rounded-full hover:bg-[#3a62a0] transition-colors shadow-lg">
+                                    {/* Read Button with hover effect */}
+                                    <motion.button
+                                      variants={buttonVariants}
+                                      whileHover="hover"
+                                      className="flex flex-row items-center gap-2 bg-[#4a7cc7] px-6 py-2.5 rounded-full hover:bg-[#3a62a0] transition-colors shadow-lg"
+                                    >
                                       <span className="text-white font-bold text-sm">اقرأ الآن</span>
                                       <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg" className="text-white"><path d="M5 12h14"></path><path d="m12 5-7 7 7 7"></path></svg>
-                                    </button>
+                                    </motion.button>
                                   </motion.div>
                                 </div>
 
