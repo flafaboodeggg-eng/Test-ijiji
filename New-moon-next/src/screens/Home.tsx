@@ -97,14 +97,14 @@ const isNewChapter = (date: Date | string): boolean => {
   return diffHours < 24;
 };
 
-// Helper: get status pill style
+// 🔥 Updated status style (swapped)
 const getStatusStyle = (status: string) => {
-  if (status === 'مستمرة') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-  if (status === 'مكتملة') return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-  return 'bg-red-500/20 text-red-300 border-red-500/30';
+  if (status === 'مكتملة') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'; // أخضر
+  if (status === 'مستمرة') return 'bg-blue-500/20 text-blue-300 border-blue-500/30'; // أزرق
+  return 'bg-red-500/20 text-red-300 border-red-500/30'; // متوقفة
 };
 
-// نوع بيانات آخر قراءة (مطابق للـ API)
+// نوع بيانات آخر قراءة
 interface LastRead {
   _id: string;
   novelId: string;
@@ -126,46 +126,35 @@ export default function Home() {
   const [visibleSlides, setVisibleSlides] = useState<number[]>([]);
   const swiperRef = useRef<any>(null);
   
-  // 🔥 استخدم useAuth بالطريقة نفسها المستخدمة في القارئ
   const { userInfo } = useAuth();
   
-  // 🔥 حالة محلية لآخر قراءة
   const [lastRead, setLastRead] = useState<LastRead | null>(null);
   const [loadingLastRead, setLoadingLastRead] = useState<boolean>(true);
 
-  // 🔥 جلب آخر قراءة عند تحميل الصفحة وعند تغيير المستخدم
+  // جلب آخر قراءة
   useEffect(() => {
     const fetchLastRead = async () => {
       if (!userInfo) {
-        console.log('❌ لا يوجد مستخدم مسجل دخول');
         setLoadingLastRead(false);
         setLastRead(null);
         return;
       }
       
-      console.log('✅ المستخدم مسجل:', userInfo.name, userInfo.email);
       setLoadingLastRead(true);
-      
       try {
         const history = await novelService.getUserLibrary(undefined, 'history', 1, 1);
-        console.log('📚 نتيجة جلب آخر قراءة:', history);
-        
         if (history && history.length > 0) {
           const item = history[0];
-          // تحقق من وجود الحقول الأساسية
           if (item.novelId && item.lastChapterId) {
             setLastRead(item as LastRead);
-            console.log('✅ تم تعيين آخر قراءة:', item.title, 'الفصل', item.lastChapterId);
           } else {
-            console.warn('⚠️ البيانات غير مكتملة:', item);
             setLastRead(null);
           }
         } else {
-          console.log('ℹ️ لا يوجد تاريخ قراءة لهذا المستخدم');
           setLastRead(null);
         }
       } catch (err) {
-        console.error('❌ فشل جلب آخر قراءة:', err);
+        console.error('Failed to fetch last read:', err);
         setLastRead(null);
       } finally {
         setLoadingLastRead(false);
@@ -175,7 +164,7 @@ export default function Home() {
     fetchLastRead();
   }, [userInfo]);
 
-  // استخدام React Query مع staleTime طويل للتخزين المؤقت
+  // استخدام React Query
   const { data: heroData, isLoading: heroLoading } = useQuery({
     queryKey: ['heroNovels'],
     queryFn: () => novelService.getNovels({ filter: 'trending', timeRange: 'week', limit: 6 }),
@@ -212,7 +201,6 @@ export default function Home() {
     fetchFirstPage();
   }, []);
 
-  // Load more updates on scroll
   const loadMoreUpdates = useCallback(async () => {
     if (loadingUpdates || !hasMoreUpdates) return;
     setLoadingUpdates(true);
@@ -229,7 +217,6 @@ export default function Home() {
     }
   }, [latestPage, hasMoreUpdates, loadingUpdates]);
 
-  // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -243,7 +230,6 @@ export default function Home() {
     return () => observer.disconnect();
   }, [hasMoreUpdates, loadingUpdates, loadMoreUpdates]);
 
-  // Dark mode effect
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -252,7 +238,6 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // تحديث الشرائح المرئية عند تغيير الشريحة في الـ Swiper
   const updateVisibleSlides = (swiper: any) => {
     const slidesPerView = swiper.params.slidesPerView;
     const activeIndex = swiper.realIndex;
@@ -291,7 +276,7 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with fixed animation for multiple slides */}
+          {/* Hero Slider */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
@@ -362,17 +347,7 @@ export default function Home() {
             </Swiper>
           </section>
 
-          {/* 🔥🔥🔥 قسم استئناف القراءة – مع تتبع كامل 🔥🔥🔥 */}
-          {(() => {
-            console.log('🔍 حالة عرض القسم:', {
-              userInfo: !!userInfo,
-              lastRead: !!lastRead,
-              loadingLastRead,
-              lastReadData: lastRead
-            });
-            return null;
-          })()}
-          
+          {/* Continue Reading Section */}
           {userInfo && lastRead && !loadingLastRead && (
             <motion.section
               initial={{ opacity: 0, y: 30 }}
@@ -402,8 +377,9 @@ export default function Home() {
                         <h3 className="text-white text-lg font-bold mb-1 line-clamp-1">
                           {lastRead.title}
                         </h3>
+                        {/* 🔥 Updated chapter display format */}
                         <p className="text-gray-400 text-sm mb-2">
-                          {lastRead.lastChapterTitle || `الفصل ${lastRead.lastChapterId}`}
+                          الفصل {lastRead.lastChapterId}: {lastRead.lastChapterTitle || ''}
                         </p>
                         <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
                           <div
@@ -426,7 +402,7 @@ export default function Home() {
             </motion.section>
           )}
 
-          {/* Section: Most Read (الأكثر قراءة) */}
+          {/* Section: Most Read */}
           <section className="px-4 md:px-8 mt-12">
             <div className="max-w-7xl mx-auto">
               <div className="flex items-center gap-2 mb-6">
@@ -460,7 +436,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Section: Recently Added (أضيف حديثاً) */}
+          {/* Section: Recently Added */}
           <section className="px-4 md:px-8 mt-16">
             <div className="max-w-7xl mx-auto">
               <div className="flex items-center gap-2 mb-6">
@@ -494,7 +470,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Section: Latest Updates with Infinite Scroll */}
+          {/* Section: Latest Updates with last 5 clickable chapters */}
           <section className="px-4 md:px-8 mt-16">
             <div className="max-w-7xl mx-auto">
               <div className="flex items-center gap-2 mb-8">
@@ -504,78 +480,87 @@ export default function Home() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 <AnimatePresence>
-                  {latestUpdates.map((novel, idx) => (
-                    <motion.div
-                      key={novel._id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: Math.min(idx * 0.03, 0.6) }}
-                      className="bg-[#0c0c0c] rounded-xl border border-white/5 overflow-hidden flex h-[300px] hover:border-white/10 transition-all duration-300"
-                    >
-                      <Link
-                        href={`/novel/${novel._id}`}
-                        className="w-[42%] relative shrink-0 h-full block overflow-hidden group"
+                  {latestUpdates.map((novel, idx) => {
+                    // 🔥 Get the last 5 chapters (newest)
+                    const chapters = novel.chapters || [];
+                    const lastFiveChapters = [...chapters].sort((a, b) => b.number - a.number).slice(0, 5);
+                    
+                    return (
+                      <motion.div
+                        key={novel._id}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: Math.min(idx * 0.03, 0.6) }}
+                        className="bg-[#0c0c0c] rounded-xl border border-white/5 overflow-hidden flex h-[300px] hover:border-white/10 transition-all duration-300"
                       >
-                        <img
-                          src={novel.cover}
-                          alt={novel.title}
-                          onContextMenu={(e) => e.preventDefault()}
-                          draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0c0c0c]/80" />
-                      </Link>
-
-                      <div className="flex-1 p-4 flex flex-col">
-                        <Link href={`/novel/${novel._id}`} className="block">
-                          <h3 className="text-white font-bold text-[17px] leading-snug line-clamp-2 mb-2 hover:text-[#ff3b8d] transition-colors">
-                            {novel.title}
-                          </h3>
+                        <Link
+                          href={`/novel/${novel._id}`}
+                          className="w-[42%] relative shrink-0 h-full block overflow-hidden group"
+                        >
+                          <img
+                            src={novel.cover}
+                            alt={novel.title}
+                            onContextMenu={(e) => e.preventDefault()}
+                            draggable={false}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0c0c0c]/80" />
                         </Link>
-                        <div className="flex justify-start items-center mb-4">
-                          <span className={`px-3 py-1 rounded-md text-xs font-medium border ${getStatusStyle(novel.status)}`}>
-                            {novel.status}
-                          </span>
-                        </div>
 
-                        <div className="flex flex-col gap-2 flex-1 overflow-hidden">
-                          {(novel.chapters || []).slice(0, 5).map((chapter, chapIdx) => {
-                            const isNew = isNewChapter(chapter.createdAt);
-                            return (
-                              <div
-                                key={chapter._id || chapIdx}
-                                className="flex justify-between items-center bg-[#151515] hover:bg-[#1a1a1a] transition-colors rounded-lg px-3 py-2.5 border border-transparent hover:border-white/5 cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[13px] font-bold text-gray-200">
-                                    الفصل {chapter.number}
-                                  </span>
-                                  {isNew && (
-                                    <span className="flex items-center gap-1 bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                      <Flame size={10} className="fill-red-400" />
-                                      جديد
+                        <div className="flex-1 p-4 flex flex-col">
+                          <Link href={`/novel/${novel._id}`} className="block">
+                            <h3 className="text-white font-bold text-[17px] leading-snug line-clamp-2 mb-2 hover:text-[#ff3b8d] transition-colors">
+                              {novel.title}
+                            </h3>
+                          </Link>
+                          <div className="flex justify-start items-center mb-4">
+                            <span className={`px-3 py-1 rounded-md text-xs font-medium border ${getStatusStyle(novel.status)}`}>
+                              {novel.status}
+                            </span>
+                          </div>
+
+                          {/* 🔥 Display last 5 chapters (clickable) */}
+                          <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+                            {lastFiveChapters.map((chapter, chapIdx) => {
+                              const isNew = isNewChapter(chapter.createdAt);
+                              return (
+                                <Link
+                                  key={chapter._id || chapIdx}
+                                  href={`/novel/${novel._id}/reader/${chapter.number}`}
+                                  className="block"
+                                >
+                                  <div className="flex justify-between items-center bg-[#151515] hover:bg-[#1a1a1a] transition-colors rounded-lg px-3 py-2.5 border border-transparent hover:border-white/5 cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[13px] font-bold text-gray-200">
+                                        الفصل {chapter.number}
+                                      </span>
+                                      {isNew && (
+                                        <span className="flex items-center gap-1 bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                          <Flame size={10} className="fill-red-400" />
+                                          جديد
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-500">
+                                      {formatRelativeTime(chapter.createdAt)}
                                     </span>
-                                  )}
-                                </div>
-                                <span className="text-[11px] font-bold text-gray-500">
-                                  {formatRelativeTime(chapter.createdAt)}
-                                </span>
+                                  </div>
+                                </Link>
+                              );
+                            })}
+                            {lastFiveChapters.length === 0 && (
+                              <div className="text-center text-gray-500 text-sm py-4">
+                                لا توجد فصول بعد
                               </div>
-                            );
-                          })}
-                          {(!novel.chapters || novel.chapters.length === 0) && (
-                            <div className="text-center text-gray-500 text-sm py-4">
-                              لا توجد فصول بعد
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               </div>
 
-              {/* Loading indicator and sentinel */}
               {loadingUpdates && (
                 <div className="flex justify-center items-center py-8">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -592,7 +577,6 @@ export default function Home() {
         </main>
       </div>
 
-      {/* إضافة CSS لتخصيص ألوان نقاط الترقيم */}
       <style jsx global>{`
         .swiper-pagination-bullet {
           background-color: #6b7280 !important;
