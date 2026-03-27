@@ -111,7 +111,6 @@ export default function Reader() {
     try {
       await commentService.addComment(novelId, content, undefined, parseInt(chapterId));
       toast.success('تم إضافة التعليق');
-      // Refresh comment count (optional)
     } catch (err) {
       toast.error('فشل إضافة التعليق');
     }
@@ -141,8 +140,6 @@ export default function Reader() {
         <title>قمر الروايات - {chapter?.title || `فصل ${chapterId}`} | {novel?.title}</title>
         <meta name="description" content={`اقرأ ${chapter?.title || `الفصل ${chapterId}`} من رواية ${novel?.title} على قمر الروايات. استمتع بأحدث الفصول المترجمة والحصرية.`} />
         <meta name="keywords" content={`${novel?.title}, ${chapter?.title}, الفصل ${chapterId}, روايات عربية, روايات مترجمة, قمر الروايات`} />
-        
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://moonnovel.vercel.app/novel/${novelId}/reader/${chapterId}`} />
         <meta property="og:title" content={`${chapter?.title || `الفصل ${chapterId}`} - ${novel?.title} | قمر الروايات`} />
@@ -150,25 +147,21 @@ export default function Reader() {
         <meta property="og:image" content={novel?.cover} />
         <meta property="article:author" content={novel?.author} />
         <meta property="article:section" content="Novels" />
-
-        {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={`https://moonnovel.vercel.app/novel/${novelId}/reader/${chapterId}`} />
         <meta property="twitter:title" content={`${chapter?.title || `الفصل ${chapterId}`} - ${novel?.title} | قمر الروايات`} />
         <meta property="twitter:description" content={`استمتع بقراءة ${chapter?.title || `الفصل ${chapterId}`} من رواية ${novel?.title}. تحديثات يومية وحصرية على قمر الروايات.`} />
         <meta property="twitter:image" content={novel?.cover} />
-
-        {/* AI Crawlers & SEO */}
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`https://moonnovel.vercel.app/novel/${novelId}/reader/${chapterId}`} />
       </Head>
-      <div className="relative h-screen w-full overflow-hidden bg-gray-900">
-        {/* Top Bar */}
+      <div className="relative h-screen w-full overflow-hidden bg-black">
+        {/* Top Bar - Glass */}
         <motion.div
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: showMenu ? 0 : -100, opacity: showMenu ? 1 : 0 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="fixed top-0 left-0 right-0 z-20 bg-black/60 backdrop-blur-xl border-b border-white/10"
+          className="fixed top-0 left-0 right-0 z-20 bg-black/40 backdrop-blur-xl border-b border-white/10"
           style={{ paddingTop: 'env(safe-area-inset-top)' }}
         >
           <div className="flex items-center justify-between px-4 py-3">
@@ -193,12 +186,12 @@ export default function Reader() {
           </div>
         </motion.div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - Glass */}
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: showMenu ? 0 : 100, opacity: showMenu ? 1 : 0 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="fixed bottom-0 left-0 right-0 z-20 bg-black/60 backdrop-blur-xl border-t border-white/10"
+          className="fixed bottom-0 left-0 right-0 z-20 bg-black/40 backdrop-blur-xl border-t border-white/10"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           <div className="flex items-center justify-between px-4 py-3 gap-4">
