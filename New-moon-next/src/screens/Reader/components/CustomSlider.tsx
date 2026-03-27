@@ -16,7 +16,7 @@ export const CustomSlider: React.FC<CustomSliderProps> = ({
   min,
   max,
   step = 1,
-  activeColor = '#4a7cc7',
+  activeColor = '#9ca3af',
 }) => {
   const [sliderWidth, setSliderWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
