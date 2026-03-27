@@ -115,7 +115,7 @@ export default function Home() {
   // استخدام React Query مع staleTime طويل للتخزين المؤقت
   const { data: heroData, isLoading: heroLoading } = useQuery({
     queryKey: ['heroNovels'],
-    queryFn: () => novelService.getNovels({ filter: 'trending', timeRange: 'week', limit: 5 }),
+    queryFn: () => novelService.getNovels({ filter: 'trending', timeRange: 'week', limit: 6 }),
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
   });
@@ -194,52 +194,6 @@ export default function Home() {
   const recentNovels = recentData?.novels || [];
   const isLoading = heroLoading || trendingLoading || recentLoading;
 
-  // تعريف متغيرات الأنيميشن للمعلومات (stagger children)
-  const infoVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const childVariants = {
-    hidden: { opacity: 0, y: 40, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25,
-        mass: 0.8,
-      },
-    },
-  };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotateX: -15 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      rotateX: 0,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 20,
-        delay: 0.3,
-      },
-    },
-    hover: {
-      scale: 1.05,
-      transition: { duration: 0.2, yoyo: Infinity },
-    },
-  };
-
   return (
     <>
       <div
@@ -250,14 +204,19 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with spectacular animations */}
+          {/* Hero Slider with fixed animation */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
               autoplay={{ delay: 5000 }}
               pagination={{ clickable: true }}
               loop
-              speed={800}
+              slidesPerView={1}
+              breakpoints={{
+                1024: {
+                  slidesPerView: 2,
+                },
+              }}
               className="h-full w-full"
               onSlideChange={(swiper) => setActiveSlideIndex(swiper.realIndex)}
               onInit={(swiper) => setActiveSlideIndex(swiper.realIndex)}
@@ -268,110 +227,51 @@ export default function Home() {
                       <div className="relative h-full w-full bg-gray-800 animate-pulse" />
                     </SwiperSlide>
                   ))
-                : heroNovels.map((novel, idx) => {
-                    const statusText = novel.status || 'مستمرة';
-                    const textColor = statusText === 'مكتملة' ? '#27ae60' : statusText === 'متوقفة' ? '#c0392b' : '#2980b9';
-
-                    return (
-                      <SwiperSlide key={novel._id}>
-                        <Link href={`/novel/${novel._id}`} className="block h-full w-full">
-                          <div className="relative h-full w-full bg-black group overflow-hidden">
-                            {/* Background Image Blurred */}
-                            <div className="absolute inset-0">
-                              <img
-                                src={novel.cover}
-                                alt={novel.title}
-                                onContextMenu={(e) => e.preventDefault()}
-                                draggable={false}
-                                className="w-full h-full object-cover blur-[15px] opacity-80 scale-110 select-none transition-transform duration-700 group-hover:scale-125"
-                              />
-                            </div>
-                            
-                            {/* Gradient Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-
-                            {/* Content */}
-                            <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
-                              <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
-                                
-                                {/* Poster Image - no animation, static */}
-                                <div className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2">
-                                  <img
-                                    src={novel.cover}
-                                    alt={novel.title}
-                                    onContextMenu={(e) => e.preventDefault()}
-                                    draggable={false}
-                                    className="w-[120px] h-[180px] md:w-[140px] md:h-[210px] object-cover rounded-xl select-none"
-                                  />
-                                </div>
-
-                                {/* Info Container - spectacular staggered animations */}
-                                <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
-                                  <motion.div
-                                    key={activeSlideIndex} // إعادة تشغيل الأنيميشن عند تغيير السلايد
-                                    variants={infoVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className="flex flex-col items-start w-full"
-                                  >
-                                    {/* Status Badge */}
-                                    <motion.div variants={childVariants} className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
-                                      <span className="text-[10px] font-bold" style={{ color: textColor }}>
-                                        {statusText}
-                                      </span>
-                                    </motion.div>
-                                    
-                                    {/* Title */}
-                                    <motion.h2 
-                                      variants={childVariants}
-                                      className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full"
+                : heroNovels.map((novel, idx) => (
+                    <SwiperSlide key={novel._id}>
+                      <Link href={`/novel/${novel._id}`} className="block h-full w-full">
+                        <div className="relative h-full w-full group">
+                          <img
+                            src={novel.cover}
+                            alt={novel.title}
+                            onContextMenu={(e) => e.preventDefault()}
+                            draggable={false}
+                            className="w-full h-full object-fill transition-transform duration-700 group-hover:scale-105 select-none"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                          <div className="absolute bottom-12 left-0 right-0 px-6 text-center z-10">
+                            {activeSlideIndex === idx && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
+                                className="flex flex-col items-center gap-3"
+                              >
+                                <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg max-w-3xl">
+                                  {novel.title}
+                                </h2>
+                                <motion.div
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.5, delay: 0.2 }}
+                                  className="flex flex-wrap justify-center gap-2"
+                                >
+                                  {novel.tags?.slice(0, 3).map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs text-white backdrop-blur-sm"
                                     >
-                                      {novel.title}
-                                    </motion.h2>
-                                    
-                                    {/* Author */}
-                                    <motion.p 
-                                      variants={childVariants}
-                                      className="text-gray-300 text-sm md:text-base mb-4 text-right w-full"
-                                    >
-                                      {novel.author}
-                                    </motion.p>
-
-                                    {/* Stats */}
-                                    <motion.div 
-                                      variants={childVariants}
-                                      className="flex flex-row items-center gap-3 mb-5"
-                                    >
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-white text-sm font-semibold">{novel.chaptersCount || 0} فصل</span>
-                                        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-[#4a7cc7]"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                                      </div>
-                                      <div className="w-[1px] h-3.5 bg-gray-600" />
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-gray-300 text-sm">{novel.views || 0}</span>
-                                        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-gray-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                      </div>
-                                    </motion.div>
-
-                                    {/* Read Button with hover effect */}
-                                    <motion.button
-                                      variants={buttonVariants}
-                                      whileHover="hover"
-                                      className="flex flex-row items-center gap-2 bg-[#4a7cc7] px-6 py-2.5 rounded-full hover:bg-[#3a62a0] transition-colors shadow-lg"
-                                    >
-                                      <span className="text-white font-bold text-sm">اقرأ الآن</span>
-                                      <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg" className="text-white"><path d="M5 12h14"></path><path d="m12 5-7 7 7 7"></path></svg>
-                                    </motion.button>
-                                  </motion.div>
-                                </div>
-
-                              </div>
-                            </div>
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </motion.div>
+                              </motion.div>
+                            )}
                           </div>
-                        </Link>
-                      </SwiperSlide>
-                    );
-                  })}
+                        </div>
+                      </Link>
+                    </SwiperSlide>
+                  ))}
             </Swiper>
           </section>
 
