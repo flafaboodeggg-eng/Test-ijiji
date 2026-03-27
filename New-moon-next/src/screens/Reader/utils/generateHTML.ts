@@ -219,7 +219,7 @@ export const generateHTML = (params: GenerateHTMLParams): string => {
     </div>
   `;
 
-  // 🔥 GENIUS PROTECTION: Obfuscate the final HTML content area
+  // Obfuscation (unchanged)
   const ZEUS_SECRET = "Z3uS_N0v3l_2026_S3cr3t_K3y";
   const obfuscate = (text: string) => {
     const encoded = encodeURIComponent(text);
@@ -286,9 +286,9 @@ export const generateHTML = (params: GenerateHTMLParams): string => {
         .mark-visible { opacity: 1; }
         .mark-hidden { opacity: 0; font-size: 0; }
 
-        .author-section-wrapper { margin-top: 50px; margin-bottom: 20px; border-top: 1px solid #222; padding-top: 20px; }
+        .author-section-wrapper { margin-top: 50px; margin-bottom: 20px; border-top: 1px solid #333; padding-top: 20px; }
         .section-title { color: ${settings.bgColor === '#fff' ? '#000' : '#fff'}; font-size: 18px; font-weight: bold; margin-bottom: 12px; text-align: right; }
-        .author-card { border-radius: 16px; overflow: hidden; margin-top: 10px; border: 1px solid #222; position: relative; height: 140px; width: 100%; cursor: pointer; }
+        .author-card { border-radius: 16px; overflow: hidden; margin-top: 10px; border: 1px solid #333; position: relative; height: 140px; width: 100%; cursor: pointer; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
         .author-banner { position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; }
         .author-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)); z-index: 1; }
         .author-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; width: 100%; }
@@ -296,7 +296,8 @@ export const generateHTML = (params: GenerateHTMLParams): string => {
         .author-avatar-img { width: 100%; height: 100%; object-fit: cover; }
         .author-name { color: #fff; font-size: 20px; font-weight: bold; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9); text-align: center; }
         .comments-btn-container { margin-bottom: 40px; padding: 0 5px; }
-        .comments-btn { width: 100%; background-color: ${settings.bgColor === '#fff' ? '#f0f0f0' : '#1a1a1a'}; border: 1px solid ${settings.bgColor === '#fff' ? '#ddd' : '#333'}; color: ${settings.bgColor === '#fff' ? '#333' : '#fff'}; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .comments-btn { width: 100%; background-color: ${settings.bgColor === '#fff' ? '#f0f0f0' : 'rgba(255,255,255,0.1)'}; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); color: ${settings.bgColor === '#fff' ? '#333' : '#fff'}; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.2s; }
+        .comments-btn:hover { background-color: ${settings.bgColor === '#fff' ? '#e0e0e0' : 'rgba(255,255,255,0.2)'}; }
       </style>
     </head>
     <body oncontextmenu="return false;">
@@ -327,10 +328,8 @@ export const generateHTML = (params: GenerateHTMLParams): string => {
             } catch (e) { return "خطأ في تحميل المحتوى الآمن."; }
           }
 
-          // Inject content safely
           document.getElementById('main-content-area').innerHTML = decrypt(_D);
 
-          // Anti-copy protection
           document.addEventListener('copy', (e) => e.preventDefault());
           document.addEventListener('cut', (e) => e.preventDefault());
           document.addEventListener('keydown', (e) => {
