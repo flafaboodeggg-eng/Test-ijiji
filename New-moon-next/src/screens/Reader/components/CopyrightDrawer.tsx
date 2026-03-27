@@ -57,14 +57,14 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/90 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
+          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/60 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
           style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           <div className="flex items-center justify-between p-4 border-b border-white/10">
             <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full">
               <X size={24} className="text-white" />
             </button>
-            <h3 className="text-white font-bold text-blue-400">حقوق التطبيق</h3>
+            <h3 className="text-white font-bold text-gray-400">حقوق التطبيق</h3>
             <div className="w-6" />
           </div>
           <div className="p-4 space-y-4">
@@ -77,7 +77,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                     onClick={() => onFrequencyChange(freq)}
                     className={`px-3 py-1 rounded-full text-xs transition-colors ${
                       frequency === freq
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-white/30 text-white'
                         : 'bg-white/10 text-gray-300 hover:bg-white/20'
                     }`}
                   >
@@ -106,7 +106,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                   type="text"
                   value={hexColor}
                   onChange={e => onHexColorChange(e.target.value)}
-                  className="flex-1 bg-white/10 text-white rounded px-3 py-2 border border-white/20 focus:border-blue-400 outline-none"
+                  className="flex-1 bg-white/10 text-white rounded px-3 py-2 border border-white/20 focus:border-white outline-none"
                 />
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -131,6 +131,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 step={1}
                 value={style.fontSize}
                 onValueChange={val => onStyleChange({ ...style, fontSize: val })}
+                activeColor="#9ca3af"
               />
             </div>
             <div>
@@ -141,6 +142,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 step={0.05}
                 value={style.opacity}
                 onValueChange={val => onStyleChange({ ...style, opacity: val })}
+                activeColor="#9ca3af"
               />
             </div>
             <div>
@@ -151,7 +153,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                     key={align}
                     onClick={() => onStyleChange({ ...style, alignment: align })}
                     className={`p-2 rounded transition-colors ${
-                      style.alignment === align ? 'bg-blue-600' : 'bg-white/10 hover:bg-white/20'
+                      style.alignment === align ? 'bg-white/20' : 'bg-white/10 hover:bg-white/20'
                     }`}
                   >
                     {align === 'right' && <AlignRight size={18} className="text-white" />}
@@ -167,7 +169,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 type="checkbox"
                 checked={style.isBold}
                 onChange={e => onStyleChange({ ...style, isBold: e.target.checked })}
-                className="w-5 h-5 accent-blue-500"
+                className="w-5 h-5 accent-white"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -176,7 +178,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 type="checkbox"
                 checked={enableSeparator}
                 onChange={e => onEnableSeparatorChange(e.target.checked)}
-                className="w-5 h-5 accent-blue-500"
+                className="w-5 h-5 accent-white"
               />
             </div>
             {enableSeparator && (
@@ -186,7 +188,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                   type="text"
                   value={separatorText}
                   onChange={e => onSeparatorTextChange(e.target.value)}
-                  className="w-full bg-white/10 text-white rounded px-3 py-2 border border-white/20 focus:border-blue-400 outline-none text-center"
+                  className="w-full bg-white/10 text-white rounded px-3 py-2 border border-white/20 focus:border-white outline-none text-center"
                 />
               </div>
             )}
@@ -196,7 +198,7 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 rows={3}
                 value={startText}
                 onChange={e => onStartTextChange(e.target.value)}
-                className="w-full bg-white/10 text-white rounded p-3 border border-white/20 focus:border-blue-400 outline-none"
+                className="w-full bg-white/10 text-white rounded p-3 border border-white/20 focus:border-white outline-none"
               />
             </div>
             <div>
@@ -205,13 +207,13 @@ export const CopyrightDrawer: React.FC<CopyrightDrawerProps> = ({
                 rows={3}
                 value={endText}
                 onChange={e => onEndTextChange(e.target.value)}
-                className="w-full bg-white/10 text-white rounded p-3 border border-white/20 focus:border-blue-400 outline-none"
+                className="w-full bg-white/10 text-white rounded p-3 border border-white/20 focus:border-white outline-none"
               />
             </div>
             <button
               onClick={onSave}
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="w-full bg-white/20 hover:bg-white/30 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
               {loading ? 'جاري الحفظ...' : <Save size={18} />}
               حفظ الحقوق
