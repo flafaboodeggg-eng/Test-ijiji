@@ -247,8 +247,19 @@ export default function Home() {
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
                               <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
                                 
-                                {/* Info Container */}
-                                <div className="flex-1 flex flex-col items-start justify-end ml-6 min-h-[210px]">
+                                {/* Poster Image - moved to the right (first in DOM for RTL) */}
+                                <div className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2">
+                                  <img
+                                    src={novel.cover}
+                                    alt={novel.title}
+                                    onContextMenu={(e) => e.preventDefault()}
+                                    draggable={false}
+                                    className="w-[120px] h-[180px] md:w-[140px] md:h-[210px] object-cover rounded-xl select-none"
+                                  />
+                                </div>
+
+                                {/* Info Container - now on the left */}
+                                <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
                                   {activeSlideIndex === idx && (
                                     <motion.div
                                       initial={{ opacity: 0, x: -20 }}
@@ -293,17 +304,6 @@ export default function Home() {
                                       </button>
                                     </motion.div>
                                   )}
-                                </div>
-
-                                {/* Poster Image */}
-                                <div className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2">
-                                  <img
-                                    src={novel.cover}
-                                    alt={novel.title}
-                                    onContextMenu={(e) => e.preventDefault()}
-                                    draggable={false}
-                                    className="w-[120px] h-[180px] md:w-[140px] md:h-[210px] object-cover rounded-xl select-none"
-                                  />
                                 </div>
 
                               </div>
