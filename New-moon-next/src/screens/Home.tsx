@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { TrendingUp, PlusCircle, Sparkles, Flame, Star, Play } from 'lucide-react';
 import Header from '../components/Header';
 import { novelService, Novel } from '../services/novel';
-import { useAuth } from '../context/AuthContext'; // تأكد من المسار الصحيح
+import { useAuth } from '../context/AuthContext';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -104,13 +104,13 @@ const getStatusStyle = (status: string) => {
   return 'bg-red-500/20 text-red-300 border-red-500/30';
 };
 
-// نوع بيانات آخر قراءة
+// نوع بيانات آخر قراءة (مطابق للـ API)
 interface LastRead {
   _id: string;
   novelId: string;
   title: string;
   cover: string;
-  lastChapterId: string;
+  lastChapterId: number;
   lastChapterTitle?: string;
   progress: number;
   updatedAt: string;
@@ -125,31 +125,31 @@ export default function Home() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [visibleSlides, setVisibleSlides] = useState<number[]>([]);
   const swiperRef = useRef<any>(null);
-  const { user } = useAuth(); // افترض وجود AuthContext
+  const { user } = useAuth(); // الحصول على المستخدم من السياق
 
-  // جلب آخر قراءة إذا كان المستخدم مسجلاً
-  const { data: lastReadData, isLoading: lastReadLoading, refetch: refetchLastRead } = useQuery({
-    queryKey: ['lastRead', user?.id],
+  // --- جلب آخر قراءة باستخدام خدمة novelService ---
+  const {
+    data: lastReadData,
+    isLoading: lastReadLoading,
+    refetch: refetchLastRead,
+  } = useQuery({
+    queryKey: ['lastRead', user?._id],
     queryFn: async () => {
       if (!user) return null;
-      const res = await fetch('/api/novel/library?type=history&limit=1');
-      const data = await res.json();
-      return data[0] || null;
+      try {
+        const history = await novelService.getUserLibrary(undefined, 'history', 1, 1);
+        return history && history.length > 0 ? (history[0] as LastRead) : null;
+      } catch (err) {
+        console.error('Failed to fetch last read:', err);
+        return null;
+      }
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true, // تحديث عند العودة للصفحة
   });
 
-  // تحديث آخر قراءة عند تغيير التركيز (مثل الرجوع للصفحة)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refetchLastRead();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [refetchLastRead]);
+  const lastRead = lastReadData;
 
   // استخدام React Query مع staleTime طويل للتخزين المؤقت
   const { data: heroData, isLoading: heroLoading } = useQuery({
@@ -256,7 +256,6 @@ export default function Home() {
   const trendingNovels = trendingData?.novels || [];
   const recentNovels = recentData?.novels || [];
   const isLoading = heroLoading || trendingLoading || recentLoading;
-  const lastRead = lastReadData as LastRead | null;
 
   return (
     <>
