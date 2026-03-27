@@ -1,23 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
-import { userService, UserProfile, UserStats } from '../services/user';
+import { userService, UserProfile } from '../services/user';
 import { novelService } from '../services/novel';
-import { 
-  User, 
-  Heart, 
-  BookOpen, 
-  Eye, 
-  Calendar, 
-  Settings, 
-  LogOut, 
-  Edit3, 
-  Camera, 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  User,
+  Heart,
+  BookOpen,
+  Eye,
+  Calendar,
+  Settings,
+  LogOut,
+  Edit3,
+  Camera,
   ChevronRight,
   Bookmark,
   Clock,
@@ -149,38 +150,30 @@ const HistoryCard = ({ item, onClick }: { item: any; onClick: () => void }) => (
   </motion.div>
 );
 
-// مكون البيانات (Stats)
-const DataRow = ({ icon: Icon, label, value, color = '#4a7cc7' }: { icon: any; label: string; value: string | number; color?: string }) => (
+// 🔥 مكون الإحصاءات المعدل (تصميم جديد)
+const DataRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | number }) => (
   <motion.div
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.3 }}
-    className="flex flex-row-reverse justify-between items-center py-3 border-b border-white/10 last:border-0"
+    className="flex items-center justify-between py-4 border-b border-white/10 last:border-0"
   >
-    <div className="text-right">
-      <p className="text-white font-medium">{label}</p>
-      <p className="text-white/40 text-sm">{value}</p>
-    </div>
-    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
-      <Icon size={20} color={color} />
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5">
+        <Icon size={16} className="text-white" />
+      </div>
+      <div className="text-right">
+        <p className="text-white/60 text-sm">{label}</p>
+        <p className="text-white font-medium text-base">{value}</p>
+      </div>
     </div>
   </motion.div>
 );
 
 export default function MyPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { userInfo, isAuthenticated, logout } = useAuth();
-  const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState({
-    readChapters: 0,
-    addedChapters: 0,
-    totalViews: 0,
-    joinDate: '',
-  });
-  const [myWorks, setMyWorks] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'data' | 'works' | 'favorites' | 'history'>('data');
   const [worksPage, setWorksPage] = useState(1);
   const [favoritesPage, setFavoritesPage] = useState(1);
@@ -191,108 +184,148 @@ export default function MyPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', email: '', bio: '' });
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: scrollContainerRef });
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.8]);
   const headerBlur = useTransform(scrollY, [0, 100], [0, 8]);
 
-  const isProfileAdmin = profileUser?.role === 'admin';
-  const isProfileContributor = profileUser?.role === 'contributor' || isProfileAdmin;
-  const isSelf = true; // هذه الصفحة للمستخدم الحالي
+  const isProfileAdmin = userInfo?.role === 'admin';
+  const isProfileContributor = userInfo?.role === 'contributor' || isProfileAdmin;
+  const isSelf = true;
 
-  // جلب البيانات
-  const fetchProfileData = useCallback(async () => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const statsRes = await userService.getUserStats(undefined, 1, 20);
-      setProfileUser(statsRes.user);
-      setMyWorks(statsRes.myWorks || []);
-      setWorksPage(1);
-      setHasMoreWorks((statsRes.myWorks || []).length === 20);
-      setStats({
-        readChapters: statsRes.readChapters || 0,
-        addedChapters: statsRes.addedChapters || 0,
-        totalViews: statsRes.totalViews || 0,
-        joinDate: statsRes.user.createdAt ? new Date(statsRes.user.createdAt).toLocaleDateString('ar-EG') : 'غير معروف',
-      });
-      setEditForm({
-        name: statsRes.user.name,
-        email: statsRes.user.email,
-        bio: statsRes.user.bio || '',
-      });
+  // 🔥 استخدم React Query مع staleTime طويل لتجنب إعادة الطلب
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useQuery({
+    queryKey: ['userStats'],
+    queryFn: () => userService.getUserStats(undefined, 1, 20),
+    enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000, // 10 دقائق
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
-      const favRes = await novelService.getUserLibrary(undefined, 'favorites', 1, 20);
-      setFavorites(favRes);
-      setFavoritesPage(1);
-      setHasMoreFavorites(favRes.length === 20);
+  const {
+    data: favoritesData,
+    isLoading: favoritesLoading,
+  } = useQuery({
+    queryKey: ['userFavorites', favoritesPage],
+    queryFn: () => novelService.getUserLibrary(undefined, 'favorites', favoritesPage, 20),
+    enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
-      const historyRes = await novelService.getUserLibrary(undefined, 'history', 1, 20);
-      setHistory(historyRes);
-      setHistoryPage(1);
-      setHasMoreHistory(historyRes.length === 20);
-    } catch (err) {
-      console.error(err);
-      toast.error('فشل تحميل الملف الشخصي');
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+  const {
+    data: historyData,
+    isLoading: historyLoading,
+  } = useQuery({
+    queryKey: ['userHistory', historyPage],
+    queryFn: () => novelService.getUserLibrary(undefined, 'history', historyPage, 20),
+    enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
+  const profileUser = statsData?.user || null;
+  const myWorks = statsData?.myWorks || [];
+  const stats = {
+    readChapters: statsData?.readChapters || 0,
+    addedChapters: statsData?.addedChapters || 0,
+    totalViews: statsData?.totalViews || 0,
+    joinDate: profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('ar-EG') : 'غير معروف',
+  };
+  const favorites = favoritesData || [];
+  const history = historyData || [];
+
+  // تحديث editForm عند تحميل البيانات
   useEffect(() => {
-    fetchProfileData();
-  }, [fetchProfileData]);
+    if (profileUser) {
+      setEditForm({
+        name: profileUser.name,
+        email: profileUser.email,
+        bio: profileUser.bio || '',
+      });
+    }
+  }, [profileUser]);
 
-  // تحميل المزيد
-  const loadMore = useCallback(async (type: 'works' | 'favorites' | 'history') => {
-    if (loadingMore) return;
+  // تحميل المزيد للـ works (باستخدام نفس الاستعلام)
+  const loadMoreWorks = useCallback(async () => {
+    if (loadingMore || !hasMoreWorks) return;
     setLoadingMore(true);
     try {
-      let nextPage = 1;
-      let newData: any[] = [];
-      if (type === 'works') {
-        nextPage = worksPage + 1;
-        const res = await userService.getUserStats(undefined, nextPage, 20);
-        newData = res.myWorks || [];
-        if (newData.length > 0) {
-          setMyWorks(prev => [...prev, ...newData]);
-          setWorksPage(nextPage);
-          setHasMoreWorks(newData.length === 20);
-        } else {
-          setHasMoreWorks(false);
-        }
-      } else if (type === 'favorites') {
-        nextPage = favoritesPage + 1;
-        const res = await novelService.getUserLibrary(undefined, 'favorites', nextPage, 20);
-        newData = res;
-        if (newData.length > 0) {
-          setFavorites(prev => [...prev, ...newData]);
-          setFavoritesPage(nextPage);
-          setHasMoreFavorites(newData.length === 20);
-        } else {
-          setHasMoreFavorites(false);
-        }
+      const nextPage = worksPage + 1;
+      const res = await userService.getUserStats(undefined, nextPage, 20);
+      const newWorks = res.myWorks || [];
+      if (newWorks.length > 0) {
+        // تحديث الكاش يدويًا
+        queryClient.setQueryData(['userStats'], (old: any) => ({
+          ...old,
+          myWorks: [...(old?.myWorks || []), ...newWorks],
+        }));
+        setWorksPage(nextPage);
+        setHasMoreWorks(newWorks.length === 20);
       } else {
-        nextPage = historyPage + 1;
-        const res = await novelService.getUserLibrary(undefined, 'history', nextPage, 20);
-        newData = res;
-        if (newData.length > 0) {
-          setHistory(prev => [...prev, ...newData]);
-          setHistoryPage(nextPage);
-          setHasMoreHistory(newData.length === 20);
-        } else {
-          setHasMoreHistory(false);
-        }
+        setHasMoreWorks(false);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoadingMore(false);
     }
-  }, [worksPage, favoritesPage, historyPage, loadingMore]);
+  }, [worksPage, hasMoreWorks, loadingMore, queryClient]);
+
+  // تحميل المزيد للمفضلة
+  const loadMoreFavorites = useCallback(async () => {
+    if (loadingMore || !hasMoreFavorites) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = favoritesPage + 1;
+      const res = await novelService.getUserLibrary(undefined, 'favorites', nextPage, 20);
+      if (res.length > 0) {
+        queryClient.setQueryData(['userFavorites', nextPage], res);
+        setFavoritesPage(nextPage);
+        setHasMoreFavorites(res.length === 20);
+      } else {
+        setHasMoreFavorites(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [favoritesPage, hasMoreFavorites, loadingMore, queryClient]);
+
+  // تحميل المزيد للسجل
+  const loadMoreHistory = useCallback(async () => {
+    if (loadingMore || !hasMoreHistory) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = historyPage + 1;
+      const res = await novelService.getUserLibrary(undefined, 'history', nextPage, 20);
+      if (res.length > 0) {
+        queryClient.setQueryData(['userHistory', nextPage], res);
+        setHistoryPage(nextPage);
+        setHasMoreHistory(res.length === 20);
+      } else {
+        setHasMoreHistory(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [historyPage, hasMoreHistory, loadingMore, queryClient]);
 
   // مراقبة التمرير لتحميل المزيد
   useEffect(() => {
@@ -301,9 +334,9 @@ export default function MyPage() {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
       const isBottom = scrollHeight - scrollTop - clientHeight < 200;
       if (isBottom && !loadingMore) {
-        if (activeTab === 'works' && hasMoreWorks) loadMore('works');
-        else if (activeTab === 'favorites' && hasMoreFavorites) loadMore('favorites');
-        else if (activeTab === 'history' && hasMoreHistory) loadMore('history');
+        if (activeTab === 'works' && hasMoreWorks) loadMoreWorks();
+        else if (activeTab === 'favorites' && hasMoreFavorites) loadMoreFavorites();
+        else if (activeTab === 'history' && hasMoreHistory) loadMoreHistory();
       }
     };
     const container = scrollContainerRef.current;
@@ -311,7 +344,7 @@ export default function MyPage() {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [activeTab, hasMoreWorks, hasMoreFavorites, hasMoreHistory, loadingMore, loadMore]);
+  }, [activeTab, hasMoreWorks, hasMoreFavorites, hasMoreHistory, loadingMore, loadMoreWorks, loadMoreFavorites, loadMoreHistory]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -320,7 +353,11 @@ export default function MyPage() {
         email: editForm.email,
         bio: editForm.bio,
       });
-      setProfileUser(updated);
+      // تحديث الكاش يدويًا
+      queryClient.setQueryData(['userStats'], (old: any) => ({
+        ...old,
+        user: updated,
+      }));
       setIsEditing(false);
       toast.success('تم تحديث الملف الشخصي');
     } catch (err: any) {
@@ -330,6 +367,7 @@ export default function MyPage() {
 
   const handleLogout = () => {
     logout();
+    queryClient.clear(); // مسح كل الكاش
     router.push('/login');
     toast.success('تم تسجيل الخروج');
   };
@@ -398,15 +436,19 @@ export default function MyPage() {
           <div className="bg-white/5 rounded-xl p-5 border border-white/10">
             <h3 className="text-white font-bold text-lg mb-4">الإحصائيات</h3>
             <div className="space-y-0">
-              <DataRow icon={isProfileAdmin ? Shield : isProfileContributor ? UserCheck : User} label="نوع العضوية" value={isProfileAdmin ? "مشرف" : isProfileContributor ? "مساهم" : "قارئ"} color={isProfileAdmin ? "#ff4444" : "#4a7cc7"} />
-              <DataRow icon={BookOpen} label="الفصول المقروءة" value={stats.readChapters} color="#4ade80" />
+              <DataRow
+                icon={isProfileAdmin ? Shield : isProfileContributor ? UserCheck : User}
+                label="نوع العضوية"
+                value={isProfileAdmin ? "مشرف" : isProfileContributor ? "مساهم" : "قارئ"}
+              />
+              <DataRow icon={BookOpen} label="الفصول المقروءة" value={stats.readChapters} />
               {isProfileContributor && (
                 <>
-                  <DataRow icon={FileText} label="الفصول المضافة" value={stats.addedChapters} color="#ffa500" />
-                  <DataRow icon={Eye} label="المشاهدات" value={stats.totalViews} color="#d44aff" />
+                  <DataRow icon={FileText} label="الفصول المضافة" value={stats.addedChapters} />
+                  <DataRow icon={Eye} label="المشاهدات" value={stats.totalViews} />
                 </>
               )}
-              <DataRow icon={Calendar} label="تاريخ الانضمام" value={stats.joinDate} color="#888" />
+              <DataRow icon={Calendar} label="تاريخ الانضمام" value={stats.joinDate} />
             </div>
           </div>
         </motion.div>
@@ -414,7 +456,7 @@ export default function MyPage() {
     }
 
     if (activeTab === 'works') {
-      if (loading && myWorks.length === 0) return <GridSkeleton />;
+      if (statsLoading && myWorks.length === 0) return <GridSkeleton />;
       if (myWorks.length === 0) {
         return (
           <motion.div
@@ -449,7 +491,7 @@ export default function MyPage() {
     }
 
     if (activeTab === 'favorites') {
-      if (loading && favorites.length === 0) return <GridSkeleton />;
+      if (favoritesLoading && favorites.length === 0) return <GridSkeleton />;
       if (favorites.length === 0) {
         return (
           <motion.div
@@ -484,7 +526,7 @@ export default function MyPage() {
     }
 
     if (activeTab === 'history') {
-      if (loading && history.length === 0) return <GridSkeleton />;
+      if (historyLoading && history.length === 0) return <GridSkeleton />;
       if (history.length === 0) {
         return (
           <motion.div
