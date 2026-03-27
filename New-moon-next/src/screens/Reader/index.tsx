@@ -24,7 +24,7 @@ import { commentService } from '../../services/comment';
 import toast from 'react-hot-toast';
 
 export default function Reader() {
-  const { novelId, chapterId } = useParams<{ novelId: string; chapterId: string }>();
+  const { slug: novelId, chapterId } = useParams<{ slug: string; chapterId: string }>();
   const router = useRouter();
   const { userInfo } = useAuth();
   const isAdmin = userInfo?.role === 'admin';
