@@ -204,8 +204,8 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with fixed animation */}
-          <section className="h-[430px] w-full overflow-hidden">
+          {/* Hero Slider - Redesigned like the mobile app */}
+          <section className="h-[430px] w-full overflow-hidden relative">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
               autoplay={{ delay: 5000 }}
@@ -225,42 +225,74 @@ export default function Home() {
                     <SwiperSlide key={novel._id}>
                       <Link href={`/novel/${novel._id}`} className="block h-full w-full">
                         <div className="relative h-full w-full group">
-                          <img
-                            src={novel.cover}
-                            alt={novel.title}
-                            onContextMenu={(e) => e.preventDefault()}
-                            draggable={false}
-                            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105 select-none"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                          <div className="absolute bottom-12 left-0 right-0 px-6 text-center z-10">
-                            {activeSlideIndex === idx && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 40 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
-                                className="flex flex-col items-center gap-3"
-                              >
-                                <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg max-w-3xl">
-                                  {novel.title}
-                                </h2>
+                          {/* Background image with blur */}
+                          <div className="absolute inset-0">
+                            <img
+                              src={novel.cover}
+                              alt={novel.title}
+                              className="w-full h-full object-cover opacity-40 blur-sm"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
+                          </div>
+
+                          {/* Content container */}
+                          <div className="relative z-10 h-full flex flex-row items-end justify-between px-4 pb-12 md:px-8 md:pb-16">
+                            {/* Poster (right side for RTL) */}
+                            <div className="w-36 md:w-44 lg:w-52 shadow-2xl rounded-xl overflow-hidden border border-white/20">
+                              <img
+                                src={novel.cover}
+                                alt={novel.title}
+                                className="w-full h-auto object-cover"
+                              />
+                            </div>
+
+                            {/* Info (left side for RTL) */}
+                            <div className="flex-1 ml-4 md:ml-6 text-right">
+                              {activeSlideIndex === idx && (
                                 <motion.div
-                                  initial={{ opacity: 0, y: 20 }}
+                                  initial={{ opacity: 0, y: 30 }}
                                   animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.5, delay: 0.2 }}
-                                  className="flex flex-wrap justify-center gap-2"
+                                  transition={{ duration: 0.5 }}
+                                  className="space-y-3"
                                 >
-                                  {novel.tags?.slice(0, 3).map((tag) => (
-                                    <span
-                                      key={tag}
-                                      className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs text-white backdrop-blur-sm"
-                                    >
-                                      {tag}
+                                  {/* Status badge */}
+                                  <div className="inline-block px-3 py-1 rounded-md bg-black/50 backdrop-blur-sm border border-white/20">
+                                    <span className="text-xs font-medium text-white">
+                                      {novel.status || 'مستمرة'}
                                     </span>
-                                  ))}
+                                  </div>
+
+                                  <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg line-clamp-2">
+                                    {novel.title}
+                                  </h2>
+                                  <p className="text-white/80 text-sm md:text-base">
+                                    {novel.author}
+                                  </p>
+
+                                  {/* Stats */}
+                                  <div className="flex flex-row-reverse items-center gap-4 text-white/70">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-sm font-medium">{novel.chaptersCount || 0}</span>
+                                      <span className="text-xs">فصل</span>
+                                    </div>
+                                    <div className="w-px h-4 bg-white/30" />
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-sm font-medium">{novel.views?.toLocaleString() || 0}</span>
+                                      <span className="text-xs">مشاهدة</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Read button */}
+                                  <button className="mt-3 px-6 py-2 bg-primary hover:bg-primary/80 rounded-full text-white font-bold flex items-center gap-2 transition-all">
+                                    <span>اقرأ الآن</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
+                                      <path d="m12 19-7-7 7-7" />
+                                      <path d="M19 12H5" />
+                                    </svg>
+                                  </button>
                                 </motion.div>
-                              </motion.div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
                       </Link>
