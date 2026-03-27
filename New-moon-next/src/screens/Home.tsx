@@ -247,8 +247,13 @@ export default function Home() {
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 z-10">
                               <div className="max-w-7xl mx-auto flex flex-row items-end justify-between">
                                 
-                                {/* Poster Image - moved to the right (first in DOM for RTL) */}
-                                <div className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2">
+                                {/* Poster Image - with animation */}
+                                <motion.div
+                                  initial={{ opacity: 0, x: 40 }}
+                                  animate={activeSlideIndex === idx ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
+                                  transition={{ duration: 0.5, ease: "easeOut" }}
+                                  className="relative shrink-0 shadow-[0_8px_24px_rgba(0,0,0,0.6)] rounded-xl border border-white/20 transition-transform duration-500 group-hover:-translate-y-2"
+                                >
                                   <img
                                     src={novel.cover}
                                     alt={novel.title}
@@ -256,54 +261,52 @@ export default function Home() {
                                     draggable={false}
                                     className="w-[120px] h-[180px] md:w-[140px] md:h-[210px] object-cover rounded-xl select-none"
                                   />
-                                </div>
+                                </motion.div>
 
-                                {/* Info Container - now on the left */}
+                                {/* Info Container - now on the left with animation */}
                                 <div className="flex-1 flex flex-col items-start justify-end min-h-[210px] mr-6">
-                                  {activeSlideIndex === idx && (
-                                    <motion.div
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ duration: 0.5, ease: "easeOut" }}
-                                      className="flex flex-col items-start w-full"
-                                    >
-                                      {/* Status Badge */}
-                                      <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
-                                        <span className="text-[10px] font-bold" style={{ color: textColor }}>
-                                          {statusText}
-                                        </span>
-                                      </div>
-                                      
-                                      {/* Title */}
-                                      <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full">
-                                        {novel.title}
-                                      </h2>
-                                      
-                                      {/* Author */}
-                                      <p className="text-gray-300 text-sm md:text-base mb-4 text-right w-full">
-                                        {novel.author}
-                                      </p>
+                                  <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={activeSlideIndex === idx ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.5, ease: "easeOut" }}
+                                    className="flex flex-col items-start w-full"
+                                  >
+                                    {/* Status Badge */}
+                                    <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 mb-2">
+                                      <span className="text-[10px] font-bold" style={{ color: textColor }}>
+                                        {statusText}
+                                      </span>
+                                    </div>
+                                    
+                                    {/* Title */}
+                                    <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 line-clamp-2 leading-tight text-right w-full">
+                                      {novel.title}
+                                    </h2>
+                                    
+                                    {/* Author */}
+                                    <p className="text-gray-300 text-sm md:text-base mb-4 text-right w-full">
+                                      {novel.author}
+                                    </p>
 
-                                      {/* Stats */}
-                                      <div className="flex flex-row items-center gap-3 mb-5">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-white text-sm font-semibold">{novel.chaptersCount || 0} فصل</span>
-                                          <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-[#4a7cc7]"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                                        </div>
-                                        <div className="w-[1px] h-3.5 bg-gray-600" />
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-gray-300 text-sm">{novel.views || 0}</span>
-                                          <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-gray-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                        </div>
+                                    {/* Stats */}
+                                    <div className="flex flex-row items-center gap-3 mb-5">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-white text-sm font-semibold">{novel.chaptersCount || 0} فصل</span>
+                                        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-[#4a7cc7]"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
                                       </div>
+                                      <div className="w-[1px] h-3.5 bg-gray-600" />
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-gray-300 text-sm">{novel.views || 0}</span>
+                                        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="14" width="14" xmlns="http://www.w3.org/2000/svg" className="text-gray-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                      </div>
+                                    </div>
 
-                                      {/* Read Button */}
-                                      <button className="flex flex-row items-center gap-2 bg-[#4a7cc7] px-6 py-2.5 rounded-full hover:bg-[#3a62a0] transition-colors shadow-lg">
-                                        <span className="text-white font-bold text-sm">اقرأ الآن</span>
-                                        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg" className="text-white"><path d="M5 12h14"></path><path d="m12 5-7 7 7 7"></path></svg>
-                                      </button>
-                                    </motion.div>
-                                  )}
+                                    {/* Read Button */}
+                                    <button className="flex flex-row items-center gap-2 bg-[#4a7cc7] px-6 py-2.5 rounded-full hover:bg-[#3a62a0] transition-colors shadow-lg">
+                                      <span className="text-white font-bold text-sm">اقرأ الآن</span>
+                                      <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg" className="text-white"><path d="M5 12h14"></path><path d="m12 5-7 7 7 7"></path></svg>
+                                    </button>
+                                  </motion.div>
                                 </div>
 
                               </div>
