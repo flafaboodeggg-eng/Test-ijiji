@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'motion/react';
-import { TrendingUp, PlusCircle, Sparkles, Flame, Star, Play } from 'lucide-react';
+import { TrendingUp, PlusCircle, Sparkles, Flame, Star } from 'lucide-react';
 import Header from '../components/Header';
 import { novelService, Novel } from '../services/novel';
 
@@ -111,30 +111,6 @@ export default function Home() {
   const [latestUpdates, setLatestUpdates] = useState<Novel[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-
-  // State for last read novel
-  const [lastReadNovel, setLastReadNovel] = useState<any>(null);
-  const [loadingLastRead, setLoadingLastRead] = useState(true);
-
-  // Fetch last read novel
-  useEffect(() => {
-    const fetchLastRead = async () => {
-      try {
-        const res = await fetch('/api/novel/library?type=history&limit=1');
-        const data = await res.json();
-        if (data && data.length > 0) {
-          setLastReadNovel(data[0]);
-        } else {
-          setLastReadNovel(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch last read:', error);
-      } finally {
-        setLoadingLastRead(false);
-      }
-    };
-    fetchLastRead();
-  }, []);
 
   // استخدام React Query مع staleTime طويل للتخزين المؤقت
   const { data: heroData, isLoading: heroLoading } = useQuery({
@@ -264,32 +240,33 @@ export default function Home() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                           <div className="absolute bottom-12 left-0 right-0 px-6 text-center z-10">
-                            {/* Always show title and tags for every slide */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 40 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
-                              className="flex flex-col items-center gap-3"
-                            >
-                              <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg max-w-3xl">
-                                {novel.title}
-                              </h2>
+                            {activeSlideIndex === idx && (
                               <motion.div
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 40 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                                className="flex flex-wrap justify-center gap-2"
+                                transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 15 }}
+                                className="flex flex-col items-center gap-3"
                               >
-                                {novel.tags?.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs text-white backdrop-blur-sm"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
+                                <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg max-w-3xl">
+                                  {novel.title}
+                                </h2>
+                                <motion.div
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.5, delay: 0.2 }}
+                                  className="flex flex-wrap justify-center gap-2"
+                                >
+                                  {novel.tags?.slice(0, 3).map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs text-white backdrop-blur-sm"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </motion.div>
                               </motion.div>
-                            </motion.div>
+                            )}
                           </div>
                         </div>
                       </Link>
@@ -297,62 +274,6 @@ export default function Home() {
                   ))}
             </Swiper>
           </section>
-
-          {/* Continue Reading Section */}
-          {!loadingLastRead && lastReadNovel && (
-            <motion.section
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="px-4 md:px-8 mt-8"
-            >
-              <div className="max-w-7xl mx-auto">
-                <div className="flex items-center gap-2 mb-6">
-                  <Play size={24} className="text-white" />
-                  <h2 className="text-xl font-bold">استئناف القراءة</h2>
-                </div>
-                <Link
-                  href={`/reader?novelId=${lastReadNovel.novelId}&chapterId=${lastReadNovel.lastChapterId}`}
-                  className="block group"
-                >
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-900 to-black border border-gray-800 hover:border-gray-700 transition-all duration-500 shadow-xl">
-                    <div className="flex flex-col md:flex-row-reverse p-4 md:p-6 gap-4">
-                      <div className="flex-shrink-0 md:w-32">
-                        <img
-                          src={lastReadNovel.cover}
-                          alt={lastReadNovel.title}
-                          className="w-full h-40 md:h-32 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="flex-1 text-right">
-                        <h3 className="text-white text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                          {lastReadNovel.title}
-                        </h3>
-                        <p className="text-gray-400 text-sm mb-3">
-                          {lastReadNovel.lastChapterTitle || `الفصل ${lastReadNovel.lastChapterId}`}
-                        </p>
-                        <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${lastReadNovel.progress || 0}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between items-center text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Play size={12} className="fill-primary" />
-                            <span>استمرار</span>
-                          </span>
-                          <span>{lastReadNovel.progress || 0}% مكتمل</span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Decorative glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
-                  </div>
-                </Link>
-              </div>
-            </motion.section>
-          )}
 
           {/* Section: Most Read (الأكثر قراءة) */}
           <section className="px-4 md:px-8 mt-12">
@@ -519,18 +440,6 @@ export default function Home() {
           </section>
         </main>
       </div>
-
-      {/* Custom styles for pagination bullets */}
-      <style jsx global>{`
-        .swiper-pagination-bullet {
-          background-color: #9ca3af !important; /* gray-400 */
-          opacity: 0.7;
-        }
-        .swiper-pagination-bullet-active {
-          background-color: #3b82f6 !important; /* blue-500 */
-          opacity: 1;
-        }
-      `}</style>
     </>
   );
 }
