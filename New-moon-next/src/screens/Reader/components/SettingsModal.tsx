@@ -77,7 +77,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl rounded-t-2xl shadow-xl"
+          className="fixed bottom-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl rounded-t-2xl shadow-xl"
           style={{ maxHeight: '85vh' }}
         >
           <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -95,7 +95,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Palette size={22} className="text-blue-400" />
+                    <Palette size={22} className="text-gray-400" />
                     <span className="text-white">مظهر القراءة</span>
                   </div>
                   <ChevronRight size={18} className="text-gray-500" />
@@ -105,7 +105,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Replace size={22} className="text-blue-400" />
+                    <Replace size={22} className="text-gray-400" />
                     <span className="text-white">استبدال الكلمات</span>
                   </div>
                   <ChevronRight size={18} className="text-gray-500" />
@@ -127,7 +127,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Save size={22} className="text-blue-400" />
+                        <Save size={22} className="text-gray-400" />
                         <span className="text-white">حقوق التطبيق</span>
                       </div>
                       <ChevronRight size={18} className="text-gray-500" />
@@ -154,7 +154,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onClick={() => onFontChange(font)}
                           className={`px-4 py-2 rounded-full text-sm transition-colors ${
                             settings.fontFamily.id === font.id
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-white/30 text-white'
                               : 'bg-white/10 text-gray-300 hover:bg-white/20'
                           }`}
                         >
@@ -195,7 +195,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           key={theme.color}
                           onClick={() => onThemeChange(theme.color)}
                           className={`w-12 h-12 rounded-full border-2 transition-colors ${
-                            settings.bgColor === theme.color ? 'border-blue-500' : 'border-transparent'
+                            settings.bgColor === theme.color ? 'border-white' : 'border-transparent'
                           }`}
                           style={{ backgroundColor: theme.color }}
                         />
@@ -211,6 +211,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       step={0.05}
                       value={settings.textBrightness}
                       onValueChange={onBrightnessChange}
+                      activeColor="#9ca3af"
                     />
                   </div>
                   {/* Dialogue Formatting */}
@@ -221,7 +222,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         type="checkbox"
                         checked={settings.enableDialogue}
                         onChange={e => onDialogueToggle(e.target.checked)}
-                        className="w-5 h-5 accent-green-500"
+                        className="w-5 h-5 accent-white"
                       />
                     </div>
                     {settings.enableDialogue && (
@@ -235,7 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 onClick={() => onQuoteStyleChange(style.id)}
                                 className={`px-3 py-1 rounded-full text-sm transition-colors ${
                                   settings.selectedQuoteStyle === style.id
-                                    ? 'bg-green-600 text-white'
+                                    ? 'bg-white/30 text-white'
                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 }`}
                               >
@@ -265,6 +266,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             step={5}
                             value={settings.dialogueSize}
                             onValueChange={onDialogueSizeChange}
+                            activeColor="#9ca3af"
                           />
                         </div>
                         <div className="flex items-center justify-between">
@@ -273,7 +275,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             type="checkbox"
                             checked={settings.hideQuotes}
                             onChange={e => onHideQuotesToggle(e.target.checked)}
-                            className="w-5 h-5 accent-green-500"
+                            className="w-5 h-5 accent-white"
                           />
                         </div>
                       </div>
@@ -301,7 +303,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 onClick={() => onMarkdownStyleChange(style.id)}
                                 className={`px-3 py-1 rounded-full text-sm transition-colors ${
                                   settings.selectedMarkdownStyle === style.id
-                                    ? 'bg-white text-black'
+                                    ? 'bg-white/30 text-white'
                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 }`}
                               >
@@ -331,6 +333,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             step={5}
                             value={settings.markdownSize}
                             onValueChange={onMarkdownSizeChange}
+                            activeColor="#9ca3af"
                           />
                         </div>
                         <div className="flex items-center justify-between">
