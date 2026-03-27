@@ -6,9 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'motion/react';
-import { TrendingUp, PlusCircle, Sparkles, Flame, Star } from 'lucide-react';
+import { TrendingUp, PlusCircle, Sparkles, Flame, Star, Play } from 'lucide-react';
 import Header from '../components/Header';
 import { novelService, Novel } from '../services/novel';
+import { useAuth } from '../context/AuthContext'; // تأكد من المسار الصحيح
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -103,6 +104,18 @@ const getStatusStyle = (status: string) => {
   return 'bg-red-500/20 text-red-300 border-red-500/30';
 };
 
+// نوع بيانات آخر قراءة
+interface LastRead {
+  _id: string;
+  novelId: string;
+  title: string;
+  cover: string;
+  lastChapterId: string;
+  lastChapterTitle?: string;
+  progress: number;
+  updatedAt: string;
+}
+
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [latestPage, setLatestPage] = useState(1);
@@ -110,7 +123,33 @@ export default function Home() {
   const [loadingUpdates, setLoadingUpdates] = useState(false);
   const [latestUpdates, setLatestUpdates] = useState<Novel[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [visibleSlides, setVisibleSlides] = useState<number[]>([]);
+  const swiperRef = useRef<any>(null);
+  const { user } = useAuth(); // افترض وجود AuthContext
+
+  // جلب آخر قراءة إذا كان المستخدم مسجلاً
+  const { data: lastReadData, isLoading: lastReadLoading, refetch: refetchLastRead } = useQuery({
+    queryKey: ['lastRead', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const res = await fetch('/api/novel/library?type=history&limit=1');
+      const data = await res.json();
+      return data[0] || null;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // تحديث آخر قراءة عند تغيير التركيز (مثل الرجوع للصفحة)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetchLastRead();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refetchLastRead]);
 
   // استخدام React Query مع staleTime طويل للتخزين المؤقت
   const { data: heroData, isLoading: heroLoading } = useQuery({
@@ -189,10 +228,35 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
+  // تحديث الشرائح المرئية عند تغيير الشريحة في الـ Swiper
+  const updateVisibleSlides = (swiper: any) => {
+    const slidesPerView = swiper.params.slidesPerView;
+    const activeIndex = swiper.realIndex;
+    const totalSlides = swiper.slides.length;
+    const visibleIndices: number[] = [];
+    for (let i = 0; i < slidesPerView; i++) {
+      let idx = activeIndex + i;
+      if (idx >= totalSlides) idx = idx - totalSlides;
+      if (idx < 0) idx = totalSlides + idx;
+      visibleIndices.push(idx);
+    }
+    setVisibleSlides(visibleIndices);
+  };
+
+  const handleSlideChange = (swiper: any) => {
+    updateVisibleSlides(swiper);
+  };
+
+  const handleSwiperInit = (swiper: any) => {
+    swiperRef.current = swiper;
+    updateVisibleSlides(swiper);
+  };
+
   const heroNovels = heroData?.novels || [];
   const trendingNovels = trendingData?.novels || [];
   const recentNovels = recentData?.novels || [];
   const isLoading = heroLoading || trendingLoading || recentLoading;
+  const lastRead = lastReadData as LastRead | null;
 
   return (
     <>
@@ -204,7 +268,7 @@ export default function Home() {
         <Header isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
         <main className="pb-16">
-          {/* Hero Slider with fixed animation */}
+          {/* Hero Slider with fixed animation for multiple slides */}
           <section className="h-[430px] w-full overflow-hidden">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
@@ -218,8 +282,8 @@ export default function Home() {
                 },
               }}
               className="h-full w-full"
-              onSlideChange={(swiper) => setActiveSlideIndex(swiper.realIndex)}
-              onInit={(swiper) => setActiveSlideIndex(swiper.realIndex)}
+              onSlideChange={handleSlideChange}
+              onInit={handleSwiperInit}
             >
               {isLoading
                 ? Array.from({ length: 3 }).map((_, i) => (
@@ -240,7 +304,7 @@ export default function Home() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                           <div className="absolute bottom-12 left-0 right-0 px-6 text-center z-10">
-                            {activeSlideIndex === idx && (
+                            {visibleSlides.includes(idx) && (
                               <motion.div
                                 initial={{ opacity: 0, y: 40 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -274,6 +338,60 @@ export default function Home() {
                   ))}
             </Swiper>
           </section>
+
+          {/* Continue Reading Section - فقط إذا كان المستخدم مسجلاً ولديه آخر قراءة */}
+          {user && lastRead && !lastReadLoading && (
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="px-4 md:px-8 mt-8"
+            >
+              <div className="max-w-7xl mx-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <Play size={22} className="text-primary" />
+                  <h2 className="text-xl font-bold">استئناف القراءة</h2>
+                </div>
+                <Link
+                  href={`/reader?novelId=${lastRead.novelId}&chapterId=${lastRead.lastChapterId}`}
+                  className="block"
+                >
+                  <div className="bg-gradient-to-r from-[#0f0f0f] to-[#0a0a0a] rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 group">
+                    <div className="flex flex-row-reverse items-center p-4 gap-4">
+                      <div className="relative w-24 h-36 rounded-lg overflow-hidden shadow-lg flex-shrink-0">
+                        <img
+                          src={lastRead.cover}
+                          alt={lastRead.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 text-right">
+                        <h3 className="text-white text-lg font-bold mb-1 line-clamp-1">
+                          {lastRead.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-2">
+                          {lastRead.lastChapterTitle || `الفصل ${lastRead.lastChapterId}`}
+                        </p>
+                        <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${lastRead.progress || 0}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{Math.round(lastRead.progress || 0)}% مكتمل</span>
+                          <span>{formatRelativeTime(lastRead.updatedAt)}</span>
+                        </div>
+                      </div>
+                      <div className="bg-white/10 p-3 rounded-full group-hover:bg-primary transition-colors duration-300">
+                        <Play size={20} className="text-white fill-white" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </motion.section>
+          )}
 
           {/* Section: Most Read (الأكثر قراءة) */}
           <section className="px-4 md:px-8 mt-12">
@@ -440,6 +558,19 @@ export default function Home() {
           </section>
         </main>
       </div>
+
+      {/* إضافة CSS لتخصيص ألوان نقاط الترقيم */}
+      <style jsx global>{`
+        .swiper-pagination-bullet {
+          background-color: #6b7280 !important; /* رمادي */
+          opacity: 0.7;
+          transition: all 0.2s;
+        }
+        .swiper-pagination-bullet-active {
+          background-color: #3b82f6 !important; /* أزرق */
+          opacity: 1;
+        }
+      `}</style>
     </>
   );
 }
