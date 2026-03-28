@@ -62,7 +62,7 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/60 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
+          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/90 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
           style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           {viewMode === 'folders' ? (
@@ -73,7 +73,7 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                 </button>
                 <h3 className="text-white font-bold">مجلدات الاستبدال</h3>
                 <button onClick={() => onShowFolderModal(true)} className="p-1 hover:bg-white/10 rounded-full">
-                  <FolderPlus size={20} className="text-gray-400" />
+                  <FolderPlus size={20} className="text-blue-400" />
                 </button>
               </div>
               <div className="divide-y divide-white/10">
@@ -84,7 +84,7 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                       <div className="text-xs text-gray-400">{folder.replacements.length} كلمة</div>
                     </button>
                     <button onClick={() => onDeleteFolder(folder.id)} className="p-2">
-                      <Trash2 size={18} className="text-gray-500 hover:text-red-400" />
+                      <Trash2 size={18} className="text-red-400" />
                     </button>
                   </div>
                 ))}
@@ -106,7 +106,7 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                 </div>
                 <div className="flex gap-2">
                   <button onClick={onToggleSort} className="p-1 hover:bg-white/10 rounded-full">
-                    <ArrowUpDown size={18} className="text-gray-400" />
+                    <ArrowUpDown size={18} className="text-blue-400" />
                   </button>
                   <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full">
                     <X size={24} className="text-white" />
@@ -120,19 +120,19 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                     placeholder="الكلمة الأصلية"
                     value={newOriginal}
                     onChange={e => onNewOriginalChange(e.target.value)}
-                    className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white outline-none"
+                    className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-blue-400 outline-none"
                   />
                   <input
                     type="text"
                     placeholder="الكلمة البديلة"
                     value={newReplacement}
                     onChange={e => onNewReplacementChange(e.target.value)}
-                    className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white outline-none"
+                    className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-blue-400 outline-none"
                   />
                 </div>
                 <button
                   onClick={onAddReplacement}
-                  className="w-full bg-white/20 hover:bg-white/30 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                 >
                   {editingId !== null ? <Save size={18} /> : <PlusCircle size={18} />}
                   {editingId !== null ? 'تحديث' : 'إضافة'}
@@ -142,7 +142,7 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                   placeholder="بحث..."
                   value={search}
                   onChange={e => onSearchChange(e.target.value)}
-                  className="w-full bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white outline-none"
+                  className="w-full bg-white/10 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-blue-400 outline-none"
                 />
               </div>
               <div className="divide-y divide-white/10">
@@ -154,10 +154,10 @@ export const ReplacementsDrawer: React.FC<ReplacementsDrawerProps> = ({
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => onEditReplacement(item, item.idx)} className="p-1">
-                        <Save size={16} className="text-gray-400 hover:text-white" />
+                        <Save size={16} className="text-blue-400" />
                       </button>
                       <button onClick={() => onDeleteReplacement(item.idx)} className="p-1">
-                        <Trash2 size={16} className="text-gray-500 hover:text-red-400" />
+                        <Trash2 size={16} className="text-red-400" />
                       </button>
                     </div>
                   </div>
