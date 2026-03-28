@@ -3,7 +3,7 @@ const getApiBaseUrl = () => {
   if (envUrl && envUrl !== 'undefined' && envUrl !== '') {
     return envUrl;
   }
-  return 'https://c-production-fba1.up.railway.app';
+  return 'https://backend-moon-lilac.vercel.app';
 };
 
 const API_BASE_URL = getApiBaseUrl();
