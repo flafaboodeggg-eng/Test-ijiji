@@ -33,14 +33,14 @@ export const CleanerDrawer: React.FC<CleanerDrawerProps> = ({
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/60 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
+          className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-md bg-black/90 backdrop-blur-xl shadow-xl border-l border-white/10 overflow-y-auto"
           style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           <div className="flex items-center justify-between p-4 border-b border-white/10">
             <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full">
               <X size={24} className="text-white" />
             </button>
-            <h3 className="text-white font-bold text-gray-400">الحذف الشامل</h3>
+            <h3 className="text-white font-bold text-red-400">الحذف الشامل</h3>
             <div className="w-6" />
           </div>
           <div className="p-4">
@@ -49,12 +49,12 @@ export const CleanerDrawer: React.FC<CleanerDrawerProps> = ({
               placeholder="النص المراد حذفه (يمكن أن يكون فقرة كاملة)"
               value={newCleanerWord}
               onChange={e => onNewCleanerWordChange(e.target.value)}
-              className="w-full bg-white/10 text-white rounded-lg p-3 border border-white/20 focus:border-white outline-none"
+              className="w-full bg-white/10 text-white rounded-lg p-3 border border-white/20 focus:border-red-400 outline-none"
             />
             <button
               onClick={onExecuteCleaner}
               disabled={cleaningLoading}
-              className="w-full mt-3 bg-red-600/80 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="w-full mt-3 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
               {cleaningLoading ? 'جاري الحذف...' : <Trash2 size={18} />}
               {cleaningLoading ? 'جارٍ الحذف...' : 'تنفيذ الحذف'}
@@ -66,10 +66,10 @@ export const CleanerDrawer: React.FC<CleanerDrawerProps> = ({
                 <div className="flex-1 text-right text-gray-300 text-sm break-all">{word}</div>
                 <div className="flex gap-2">
                   <button onClick={() => onEditCleaner(word, idx)} className="p-1">
-                    <Save size={16} className="text-gray-400 hover:text-white" />
+                    <Save size={16} className="text-blue-400" />
                   </button>
                   <button onClick={() => onDeleteCleaner(word)} className="p-1">
-                    <Trash2 size={16} className="text-gray-500 hover:text-red-400" />
+                    <Trash2 size={16} className="text-red-400" />
                   </button>
                 </div>
               </div>
