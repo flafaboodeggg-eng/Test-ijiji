@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import NovelPageScreen from '@/screens/NovelPage';
 
 async function getNovel(slug: string) {
-  const apiUrl = `https://c-production-fba1.up.railway.app/api/novels/${slug}`;
+  const apiUrl = `https://c-production-89da.up.railway.app/api/novels/${slug}`;
   try {
     const res = await fetch(apiUrl, {
       next: { revalidate: 3600 },
